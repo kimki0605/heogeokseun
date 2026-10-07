@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.heogeokseun.mapper.MemberMapper">
+
+    <insert id="insertMember"
+            parameterType="com.heogeokseun.domain.Member">
+
+        INSERT INTO MEMBER (
+            MEMBER_NO,
+            MEMBER_ID,
+            MEMBER_PW,
+            NICKNAME,
+            EMAIL,
+            ROLE,
+            STATUS,
+            CREATED_AT
+        )
+        VALUES (
+            SEQ_MEMBER.NEXTVAL,
+            #{memberId},
+            #{memberPw},
+            #{nickname},
+            #{email},
+            'USER',
+            'ACTIVE',
+            SYSDATE
+        )
+
+    </insert>
+
+    <select id="countByMemberId"
+            parameterType="string"
+            resultType="int">
+
+        SELECT COUNT(*)
+        FROM MEMBER
+        WHERE MEMBER_ID = #{memberId}
+
+    </select>
+
+    <select id="countByNickname"
+            parameterType="string"
+            resultType="int">
+
+        SELECT COUNT(*)
+        FROM MEMBER
+        WHERE NICKNAME = #{nickname}
+
+    </select>
+
+    <select id="countByEmail"
+            parameterType="string"
+            resultType="int">
+
+        SELECT COUNT(*)
+        FROM MEMBER
+        WHERE EMAIL = #{email}
+
+    </select>
+
+    <select id="findByMemberId"
+            parameterType="string"
+            resultType="com.heogeokseun.domain.Member">
+
+        SELECT
+            MEMBER_NO,
+            MEMBER_ID,
+            MEMBER_PW,
+            NICKNAME,
+            EMAIL,
+            ROLE,
+            STATUS,
+            CREATED_AT
+        FROM MEMBER
+        WHERE MEMBER_ID = #{memberId}
+
+    </select>
+
+</mapper>

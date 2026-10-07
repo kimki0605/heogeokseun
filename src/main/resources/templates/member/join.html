@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>회원가입 | 허걱슨닷컴</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f9fc;
+            color: #222;
+        }
+
+        header {
+            height: 70px;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            margin: 60px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        .container h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .description {
+            text-align: center;
+            color: #777;
+            margin-bottom: 35px;
+            font-size: 14px;
+        }
+
+        .error-message {
+            background: #fff1f1;
+            color: #dc2626;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            height: 48px;
+            padding: 0 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: #2563eb;
+        }
+
+        .password-info {
+            display: block;
+            margin-top: 7px;
+            color: #777;
+            font-size: 12px;
+        }
+
+        .input-button-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .input-button-row input {
+            flex: 1;
+        }
+
+        .verify-button {
+            width: 120px;
+            height: 48px;
+            border: none;
+            border-radius: 8px;
+            background: #374151;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .verify-button:hover {
+            background: #1f2937;
+        }
+
+        .verify-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .verification-message {
+            display: block;
+            margin-top: 8px;
+            font-size: 13px;
+        }
+
+        .success {
+            color: #16a34a;
+        }
+
+        .fail {
+            color: #dc2626;
+        }
+
+        .join-button {
+            width: 100%;
+            height: 50px;
+            border: none;
+            border-radius: 8px;
+            background: #2563eb;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .join-button:hover {
+            background: #1d4ed8;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .login-link a {
+            color: #2563eb;
+            font-weight: bold;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <a href="/" class="logo">허걱슨닷컴</a>
+</header>
+
+<main class="container">
+
+    <h1>회원가입</h1>
+
+    <p class="description">
+        허걱슨닷컴에 가입하고 다양한 이야기를 나눠보세요.
+    </p>
+
+    <div
+        class="error-message"
+        th:if="${errorMessage}"
+        th:text="${errorMessage}">
+    </div>
+
+    <form action="/join" method="post" id="joinForm">
+
+        <div class="form-group">
+            <label for="memberId">아이디</label>
+
+            <input
+                type="text"
+                id="memberId"
+                name="memberId"
+                placeholder="아이디를 입력하세요"
+                required>
+        </div>
+
+        <div class="form-group">
+            <label for="memberPw">비밀번호</label>
+
+            <input
+                type="password"
+                id="memberPw"
+                name="memberPw"
+                placeholder="6자리 이상, 특수문자 1개 이상"
+                minlength="6"
+                pattern="(?=.*[^a-zA-Z0-9]).{6,}"
+                title="비밀번호는 6자리 이상이며 특수문자를 최소 1개 포함해야 합니다."
+                required>
+
+            <span class="password-info">
+                6자리 이상, 특수문자를 최소 1개 포함해야 합니다.
+            </span>
+        </div>
+
+        <div class="form-group">
+            <label for="nickname">닉네임</label>
+
+            <input
+                type="text"
+                id="nickname"
+                name="nickname"
+                placeholder="닉네임을 입력하세요"
+                required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">이메일</label>
+
+            <div class="input-button-row">
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="example@gmail.com"
+                    required>
+
+                <button
+                    type="button"
+                    class="verify-button"
+                    id="sendEmailButton">
+                    인증번호 발송
+                </button>
+
+            </div>
+
+            <span
+                id="emailSendMessage"
+                class="verification-message">
+            </span>
+        </div>
+
+        <div
+            class="form-group"
+            id="verificationGroup"
+            style="display: none;">
+
+            <label for="verificationCode">
+                인증번호
+            </label>
+
+            <div class="input-button-row">
+
+                <input
+                    type="text"
+                    id="verificationCode"
+                    inputmode="numeric"
+                    maxlength="6"
+                    placeholder="6자리 인증번호">
+
+                <button
+                    type="button"
+                    class="verify-button"
+                    id="verifyEmailButton">
+                    인증 확인
+                </button>
+
+            </div>
+
+            <span
+                id="verificationMessage"
+                class="verification-message">
+            </span>
+
+        </div>
+
+        <button
+            type="submit"
+            class="join-button">
+            회원가입
+        </button>
+
+    </form>
+
+    <div class="login-link">
+        이미 계정이 있나요?
+        <a href="/login">로그인</a>
+    </div>
+
+</main>
+
+<script>
+    const emailInput =
+        document.getElementById("email");
+
+    const sendEmailButton =
+        document.getElementById("sendEmailButton");
+
+    const verifyEmailButton =
+        document.getElementById("verifyEmailButton");
+
+    const verificationGroup =
+        document.getElementById("verificationGroup");
+
+    const verificationCodeInput =
+        document.getElementById("verificationCode");
+
+    const emailSendMessage =
+        document.getElementById("emailSendMessage");
+
+    const verificationMessage =
+        document.getElementById("verificationMessage");
+
+    let emailVerified = false;
+
+    sendEmailButton.addEventListener("click", async function () {
+
+        const email = emailInput.value.trim();
+
+        if (email === "") {
+            emailSendMessage.textContent =
+                "이메일을 입력해주세요.";
+
+            emailSendMessage.className =
+                "verification-message fail";
+
+            return;
+        }
+
+        if (!emailInput.checkValidity()) {
+            emailSendMessage.textContent =
+                "올바른 이메일 형식을 입력해주세요.";
+
+            emailSendMessage.className =
+                "verification-message fail";
+
+            return;
+        }
+
+        sendEmailButton.disabled = true;
+        sendEmailButton.textContent = "발송 중...";
+
+        try {
+
+            const response = await fetch("/email/send", {
+                method: "POST",
+                headers: {
+                    "Content-Type":
+                        "application/x-www-form-urlencoded"
+                },
+                body:
+                    "email=" +
+                    encodeURIComponent(email)
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+
+                emailVerified = false;
+
+                verificationGroup.style.display =
+                    "block";
+
+                emailSendMessage.textContent =
+                    data.message;
+
+                emailSendMessage.className =
+                    "verification-message success";
+
+                verificationMessage.textContent = "";
+                verificationCodeInput.value = "";
+
+            } else {
+
+                emailSendMessage.textContent =
+                    data.message;
+
+                emailSendMessage.className =
+                    "verification-message fail";
+            }
+
+        } catch (error) {
+
+            emailSendMessage.textContent =
+                "인증번호 발송 중 오류가 발생했습니다.";
+
+            emailSendMessage.className =
+                "verification-message fail";
+
+        } finally {
+
+            sendEmailButton.disabled = false;
+            sendEmailButton.textContent =
+                "인증번호 발송";
+        }
+    });
+
+    verifyEmailButton.addEventListener("click", async function () {
+
+        const email =
+            emailInput.value.trim();
+
+        const code =
+            verificationCodeInput.value.trim();
+
+        if (code.length !== 6) {
+
+            verificationMessage.textContent =
+                "6자리 인증번호를 입력해주세요.";
+
+            verificationMessage.className =
+                "verification-message fail";
+
+            return;
+        }
+
+        try {
+
+            const response = await fetch("/email/verify", {
+                method: "POST",
+                headers: {
+                    "Content-Type":
+                        "application/x-www-form-urlencoded"
+                },
+                body:
+                    "email=" +
+                    encodeURIComponent(email) +
+                    "&code=" +
+                    encodeURIComponent(code)
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+
+                emailVerified = true;
+
+                verificationMessage.textContent =
+                    data.message;
+
+                verificationMessage.className =
+                    "verification-message success";
+
+                emailInput.readOnly = true;
+                verificationCodeInput.readOnly = true;
+
+                verifyEmailButton.disabled = true;
+                sendEmailButton.disabled = true;
+
+            } else {
+
+                emailVerified = false;
+
+                verificationMessage.textContent =
+                    data.message;
+
+                verificationMessage.className =
+                    "verification-message fail";
+            }
+
+        } catch (error) {
+
+            emailVerified = false;
+
+            verificationMessage.textContent =
+                "이메일 인증 중 오류가 발생했습니다.";
+
+            verificationMessage.className =
+                "verification-message fail";
+        }
+    });
+
+    document
+        .getElementById("joinForm")
+        .addEventListener("submit", function (event) {
+
+            if (!emailVerified) {
+
+                event.preventDefault();
+
+                verificationMessage.textContent =
+                    "이메일 인증을 완료해주세요.";
+
+                verificationMessage.className =
+                    "verification-message fail";
+
+                verificationGroup.style.display =
+                    "block";
+            }
+        });
+
+    emailInput.addEventListener("input", function () {
+
+        if (!emailInput.readOnly) {
+            emailVerified = false;
+        }
+    });
+</script>
+
+</body>
+</html>

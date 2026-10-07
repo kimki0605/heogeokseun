@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>로그인 | 허걱슨닷컴</title>
+
+    <style>
+        /* 모든 요소의 기본 여백 제거 및 크기 계산 방식 통일 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 전체 페이지 */
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f9fc;
+            color: #222;
+        }
+
+        /* 상단 헤더 */
+        header {
+            height: 70px;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 허걱슨닷컴 로고 */
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        /* 로그인 박스 */
+        .container {
+            width: 100%;
+            max-width: 460px;
+
+            margin: 80px auto;
+            padding: 40px;
+
+            background: white;
+
+            border-radius: 16px;
+
+            box-shadow:
+                0 5px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        /* 로그인 제목 */
+        .container h1 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        /* 로그인 설명 */
+        .description {
+            text-align: center;
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 35px;
+        }
+
+        /* 로그인 실패 메시지 */
+        .error-message {
+            background: #fff1f1;
+            color: #dc2626;
+
+            padding: 12px;
+
+            border-radius: 8px;
+
+            margin-bottom: 20px;
+
+            text-align: center;
+            font-size: 14px;
+        }
+
+        /* 입력창 그룹 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        /* 입력창 제목 */
+        .form-group label {
+            display: block;
+
+            margin-bottom: 8px;
+
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* 아이디 / 비밀번호 입력창 */
+        .form-group input {
+            width: 100%;
+            height: 48px;
+
+            padding: 0 14px;
+
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+
+            font-size: 15px;
+
+            outline: none;
+        }
+
+        /* 입력창 선택 시 */
+        .form-group input:focus {
+            border-color: #2563eb;
+        }
+
+        /* 로그인 버튼 */
+        .login-button {
+            width: 100%;
+            height: 50px;
+
+            border: none;
+            border-radius: 8px;
+
+            background: #2563eb;
+            color: white;
+
+            font-size: 16px;
+            font-weight: bold;
+
+            cursor: pointer;
+
+            margin-top: 10px;
+        }
+
+        /* 로그인 버튼 마우스 올렸을 때 */
+        .login-button:hover {
+            background: #1d4ed8;
+        }
+
+        /* 회원가입 이동 영역 */
+        .join-link {
+            margin-top: 25px;
+
+            text-align: center;
+
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* 회원가입 링크 */
+        .join-link a {
+            color: #2563eb;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        /* 메인으로 돌아가기 */
+        .home-link {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .home-link a {
+            color: #777;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .home-link a:hover {
+            color: #2563eb;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- 상단 영역 -->
+<header>
+
+    <!-- 로고 클릭 시 메인 페이지로 이동 -->
+    <a href="/" class="logo">
+        허걱슨닷컴
+    </a>
+
+</header>
+
+
+<!-- 로그인 영역 -->
+<main class="container">
+
+    <h1>로그인</h1>
+
+    <p class="description">
+        허걱슨닷컴에 로그인하고 다양한 이야기를 만나보세요.
+    </p>
+
+
+    <!--
+        로그인에 실패했을 때만 출력됨.
+
+        MemberController에서
+        model.addAttribute("errorMessage", ...)
+        로 전달한 메시지가 여기에 표시됨.
+    -->
+    <div
+        class="error-message"
+        th:if="${errorMessage}"
+        th:text="${errorMessage}">
+    </div>
+
+
+    <!--
+        로그인 폼
+
+        POST 방식으로 /login에 요청을 보냄.
+        name 값은 MemberController의
+        @RequestParam 이름과 동일해야 함.
+    -->
+    <form
+        action="/login"
+        method="post">
+
+        <!-- 아이디 -->
+        <div class="form-group">
+
+            <label for="memberId">
+                아이디
+            </label>
+
+            <input
+                type="text"
+                id="memberId"
+                name="memberId"
+                placeholder="아이디를 입력하세요"
+                autocomplete="username"
+                required>
+
+        </div>
+
+
+        <!-- 비밀번호 -->
+        <div class="form-group">
+
+            <label for="memberPw">
+                비밀번호
+            </label>
+
+            <input
+                type="password"
+                id="memberPw"
+                name="memberPw"
+                placeholder="비밀번호를 입력하세요"
+                autocomplete="current-password"
+                required>
+
+        </div>
+
+
+        <!-- 로그인 버튼 -->
+        <button
+            type="submit"
+            class="login-button">
+
+            로그인
+
+        </button>
+
+    </form>
+
+
+    <!-- 회원가입 페이지 이동 -->
+    <div class="join-link">
+
+        아직 계정이 없나요?
+
+        <a href="/join">
+            회원가입
+        </a>
+
+    </div>
+
+
+    <!-- 메인 페이지 이동 -->
+    <div class="home-link">
+
+        <a href="/">
+            메인으로 돌아가기
+        </a>
+
+    </div>
+
+</main>
+
+</body>
+
+</html>
