@@ -17,6 +17,10 @@
 
         <result property="memberNo" column="MEMBER_NO"/>
 
+        <!-- JOIN으로 조회한 작성자 닉네임 -->
+        <result property="authorNickname"
+                column="AUTHOR_NICKNAME"/>
+
         <result property="title" column="TITLE"/>
 
         <result property="content" column="CONTENT"/>
@@ -38,19 +42,26 @@
             resultMap="postResultMap">
 
         SELECT
-            POST_NO,
-            BOARD_NO,
-            MEMBER_NO,
-            TITLE,
-            CONTENT,
-            VIEW_COUNT,
-            POST_STATUS,
-            CREATED_AT,
-            UPDATED_AT
-        FROM POST
-        WHERE BOARD_NO = #{boardNo}
-          AND POST_STATUS = 'ACTIVE'
-        ORDER BY CREATED_AT DESC, POST_NO DESC
+            P.POST_NO,
+            P.BOARD_NO,
+            P.MEMBER_NO,
+            M.NICKNAME AS AUTHOR_NICKNAME,
+            P.TITLE,
+            P.CONTENT,
+            P.VIEW_COUNT,
+            P.POST_STATUS,
+            P.CREATED_AT,
+            P.UPDATED_AT
+        FROM POST P
+
+        <!-- 탈퇴 또는 비활성 회원의 게시글도 유지 -->
+        LEFT JOIN MEMBER M
+            ON P.MEMBER_NO = M.MEMBER_NO
+
+        WHERE P.BOARD_NO = #{boardNo}
+          AND P.POST_STATUS = 'ACTIVE'
+
+        ORDER BY P.CREATED_AT DESC, P.POST_NO DESC
 
     </select>
 
@@ -71,6 +82,7 @@
             CREATED_AT,
             UPDATED_AT
         FROM POST
+
         WHERE POST_NO = #{postNo}
           AND POST_STATUS = 'ACTIVE'
 
@@ -147,12 +159,325 @@
     <update id="deletePost">
 
         UPDATE POST
-        SET POST_STATUS = 'DELETED',
+        SET
+            POST_STATUS = 'DELETED',
             UPDATED_AT = SYSDATE
         WHERE POST_NO = #{postNo}
           AND MEMBER_NO = #{memberNo}
           AND POST_STATUS = 'ACTIVE'
 
     </update>
+
+    <!-- ========================================
+         게시글 검색
+         
+         searchType = title : 제목 검색
+         searchType = all   : 제목 + 내용 검색
+
+         특정 게시판의 활성 게시글만 검색하며
+         작성자 닉네임도 함께 조회한다.
+         ======================================== -->
+    <select id="searchPosts"
+            resultMap="postResultMap">
+
+        SELECT
+            P.POST_NO,
+            P.BOARD_NO,
+            P.MEMBER_NO,
+            M.NICKNAME AS AUTHOR_NICKNAME,
+            P.TITLE,
+            P.CONTENT,
+            P.VIEW_COUNT,
+            P.POST_STATUS,
+            P.CREATED_AT,
+            P.UPDATED_AT
+
+        FROM POST P
+
+        LEFT JOIN MEMBER M
+            ON P.MEMBER_NO = M.MEMBER_NO
+
+        WHERE P.BOARD_NO = #{boardNo}
+          AND P.POST_STATUS = 'ACTIVE'
+
+        <choose>
+
+            <!-- 제목 검색 -->
+            <when test="searchType == 'title'">
+                AND INSTR(
+                    LOWER(P.TITLE),
+                    LOWER(#{keyword})
+                ) > 0
+            </when>
+
+            <!-- 제목 + 내용 검색 -->
+            <when test="searchType == 'all'">
+                AND (
+                    INSTR(
+                        LOWER(P.TITLE),
+                        LOWER(#{keyword})
+                    ) > 0
+
+                    OR
+
+                    INSTR(
+                        LOWER(P.CONTENT),
+                        LOWER(#{keyword})
+                    ) > 0
+                )
+            </when>
+
+            <!-- 잘못된 검색 유형은 결과 없음 -->
+            <otherwise>
+                AND 1 = 0
+            </otherwise>
+
+        </choose>
+
+        ORDER BY P.CREATED_AT DESC, P.POST_NO DESC
+
+    </select>
+    
+    
+    <!-- ========================================
+         게시글 페이징 조회
+
+         boardNo    : 게시판 번호
+         searchType : title 또는 all
+         keyword    : 검색어
+         offset     : 건너뛸 게시글 수
+         pageSize   : 가져올 게시글 수
+
+         검색어가 없으면 전체 게시글 조회
+         검색어가 있으면 검색 조건 적용
+
+         Oracle OFFSET / FETCH 사용
+         ======================================== -->
+    <select id="findPostsByPage"
+            resultMap="postResultMap">
+
+        SELECT
+            P.POST_NO,
+            P.BOARD_NO,
+            P.MEMBER_NO,
+            M.NICKNAME AS AUTHOR_NICKNAME,
+            P.TITLE,
+            P.CONTENT,
+            P.VIEW_COUNT,
+            P.POST_STATUS,
+            P.CREATED_AT,
+            P.UPDATED_AT
+
+        FROM POST P
+
+        <!-- 작성자 닉네임 조회 -->
+        LEFT JOIN MEMBER M
+            ON P.MEMBER_NO = M.MEMBER_NO
+
+        WHERE P.BOARD_NO = #{boardNo}
+          AND P.POST_STATUS = 'ACTIVE'
+
+        <!-- 검색어가 존재할 때만 검색 조건 적용 -->
+        <if test="keyword != null and keyword != ''">
+
+            <choose>
+
+                <!-- 제목 검색 -->
+                <when test="searchType == 'title'">
+
+                    AND INSTR(
+                        LOWER(P.TITLE),
+                        LOWER(#{keyword})
+                    ) > 0
+
+                </when>
+
+                <!-- 제목 + 내용 검색 -->
+                <when test="searchType == 'all'">
+
+                    AND (
+                        INSTR(
+                            LOWER(P.TITLE),
+                            LOWER(#{keyword})
+                        ) > 0
+
+                        OR
+
+                        INSTR(
+                            LOWER(P.CONTENT),
+                            LOWER(#{keyword})
+                        ) > 0
+                    )
+
+                </when>
+
+                <!-- 허용되지 않은 검색 유형 -->
+                <otherwise>
+                    AND 1 = 0
+                </otherwise>
+
+            </choose>
+
+        </if>
+
+        <!-- 최신 게시글부터 정렬 -->
+        ORDER BY P.CREATED_AT DESC, P.POST_NO DESC
+
+        <!-- Oracle 페이징 처리 -->
+        OFFSET #{offset} ROWS
+        FETCH NEXT #{pageSize} ROWS ONLY
+
+    </select>
+
+
+    <!-- ========================================
+         게시글 총 개수 조회
+
+         전체 게시글 수 또는 검색 결과 수 계산
+
+         findPostsByPage와 동일한 검색 조건을
+         사용해야 페이지 개수가 정확해진다.
+         ======================================== -->
+    <select id="countPosts"
+            resultType="long">
+
+        SELECT COUNT(*)
+
+        FROM POST P
+
+        WHERE P.BOARD_NO = #{boardNo}
+          AND P.POST_STATUS = 'ACTIVE'
+
+        <!-- 검색어가 있을 때만 검색 조건 적용 -->
+        <if test="keyword != null and keyword != ''">
+
+            <choose>
+
+                <!-- 제목 검색 -->
+                <when test="searchType == 'title'">
+
+                    AND INSTR(
+                        LOWER(P.TITLE),
+                        LOWER(#{keyword})
+                    ) > 0
+
+                </when>
+
+                <!-- 제목 + 내용 검색 -->
+                <when test="searchType == 'all'">
+
+                    AND (
+                        INSTR(
+                            LOWER(P.TITLE),
+                            LOWER(#{keyword})
+                        ) > 0
+
+                        OR
+
+                        INSTR(
+                            LOWER(P.CONTENT),
+                            LOWER(#{keyword})
+                        ) > 0
+                    )
+
+                </when>
+
+                <!-- 허용되지 않은 검색 유형 -->
+                <otherwise>
+                    AND 1 = 0
+                </otherwise>
+
+            </choose>
+
+        </if>
+
+    </select>
+    
+    
+    <!-- ========================================
+         메인페이지 최신 게시글 조회
+
+         전체 게시판의 활성 게시글 조회
+         작성일 기준 최신순 정렬
+         최대 limit개 조회
+         ======================================== -->
+    <select id="findLatestPosts"
+            resultMap="postResultMap">
+
+        SELECT
+            P.POST_NO,
+            P.BOARD_NO,
+            P.MEMBER_NO,
+            M.NICKNAME AS AUTHOR_NICKNAME,
+            P.TITLE,
+            P.CONTENT,
+            P.VIEW_COUNT,
+            P.POST_STATUS,
+            P.CREATED_AT,
+            P.UPDATED_AT
+
+        FROM POST P
+
+        LEFT JOIN MEMBER M
+            ON P.MEMBER_NO = M.MEMBER_NO
+
+        INNER JOIN BOARD B
+            ON P.BOARD_NO = B.BOARD_NO
+
+        WHERE P.POST_STATUS = 'ACTIVE'
+          AND B.BOARD_STATUS = 'ACTIVE'
+
+        ORDER BY P.CREATED_AT DESC, P.POST_NO DESC
+
+        FETCH FIRST #{limit} ROWS ONLY
+
+    </select>
+    
+    
+    <!-- ========================================
+         메인페이지 인기 게시글 조회
+
+         전체 게시판의 활성 게시글 조회
+         조회수가 높은 순서대로 정렬
+         조회수가 같으면 최신 작성일순 정렬
+         최대 limit개 조회
+         ======================================== -->
+    <select id="findPopularPosts"
+            resultMap="postResultMap">
+
+        SELECT
+            P.POST_NO,
+            P.BOARD_NO,
+            P.MEMBER_NO,
+            M.NICKNAME AS AUTHOR_NICKNAME,
+            P.TITLE,
+            P.CONTENT,
+            P.VIEW_COUNT,
+            P.POST_STATUS,
+            P.CREATED_AT,
+            P.UPDATED_AT
+
+        FROM POST P
+
+        LEFT JOIN MEMBER M
+            ON P.MEMBER_NO = M.MEMBER_NO
+
+        INNER JOIN BOARD B
+            ON P.BOARD_NO = B.BOARD_NO
+
+        WHERE P.POST_STATUS = 'ACTIVE'
+          AND B.BOARD_STATUS = 'ACTIVE'
+
+        ORDER BY
+            P.VIEW_COUNT DESC,
+            P.CREATED_AT DESC,
+            P.POST_NO DESC
+
+        FETCH FIRST #{limit} ROWS ONLY
+
+    </select>
+    
+    
+    
 
 </mapper>

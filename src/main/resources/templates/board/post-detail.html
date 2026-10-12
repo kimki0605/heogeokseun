@@ -1,0 +1,401 @@
+
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title th:text="${post.title} + ' | 허걱슨닷컴'">
+        게시글 상세보기 | 허걱슨닷컴
+    </title>
+
+    <link rel="stylesheet" th:href="@{/css/style.css(v=3)}">
+
+    <style>
+        /* 상세 페이지 전체 영역 */
+        .post-detail-page {
+            max-width: 1000px;
+            min-height: 70vh;
+            margin: 0 auto;
+            padding: 55px 24px 100px;
+        }
+
+        /* 상단 헤더 */
+        .post-detail-header {
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .post-detail-header-inner {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .post-detail-logo {
+            color: #2563eb;
+            font-size: 23px;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .post-detail-nav {
+            display: flex;
+            gap: 24px;
+        }
+
+        .post-detail-nav a {
+            color: #334155;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .post-detail-nav a:hover {
+            color: #2563eb;
+        }
+
+        /* 게시판 경로 */
+        .post-breadcrumb {
+            margin-bottom: 28px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .post-breadcrumb a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        /* 게시글 제목 및 작성 정보 */
+        .post-heading {
+            padding-bottom: 28px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .post-heading h1 {
+            margin-bottom: 20px;
+            color: #0f172a;
+            font-size: 30px;
+            font-weight: 800;
+            overflow-wrap: anywhere;
+        }
+
+        .post-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 24px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        /* 게시글 본문 */
+        .post-content {
+            min-height: 250px;
+            padding: 40px 0;
+            color: #334155;
+            font-size: 16px;
+            line-height: 1.9;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        /* 하단 버튼 영역 */
+        .post-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding-top: 30px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .post-owner-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .post-back-button,
+        .post-edit-button,
+        .post-delete-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            min-height: 44px;
+            padding: 12px 24px;
+            border-radius: 9px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* 목록 버튼 */
+        .post-back-button {
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #334155;
+        }
+
+        .post-back-button:hover {
+            background: #f8fafc;
+        }
+
+        /* 수정 버튼 */
+        .post-edit-button {
+            border: 1px solid #2563eb;
+            background: #2563eb;
+            color: #ffffff;
+        }
+
+        .post-edit-button:hover {
+            background: #1d4ed8;
+        }
+
+        /* 삭제 버튼 */
+        .post-delete-button {
+            border: 1px solid #fecaca;
+            background: #ffffff;
+            color: #dc2626;
+        }
+
+        .post-delete-button:hover {
+            background: #fef2f2;
+        }
+
+        /* 안내 메시지 */
+        .post-message {
+            margin-bottom: 24px;
+            padding: 14px 18px;
+            border-radius: 9px;
+            font-size: 14px;
+        }
+
+        .post-message-success {
+            border: 1px solid #bbf7d0;
+            background: #f0fdf4;
+            color: #166534;
+        }
+
+        .post-message-error {
+            border: 1px solid #fecaca;
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        /* 하단 푸터 */
+        .post-detail-footer {
+            padding: 30px 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #94a3b8;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        /* 모바일 화면 대응 */
+        @media (max-width: 650px) {
+            .post-detail-page {
+                padding: 35px 16px 70px;
+            }
+
+            .post-detail-header-inner {
+                flex-wrap: wrap;
+            }
+
+            .post-detail-nav {
+                gap: 14px;
+            }
+
+            .post-heading h1 {
+                font-size: 25px;
+            }
+
+            .post-actions {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .post-back-button {
+                width: 100%;
+            }
+
+            .post-owner-actions {
+                width: 100%;
+            }
+
+            .post-owner-actions > a,
+            .post-owner-actions > form {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .post-delete-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 상단 메뉴 -->
+    <header class="post-detail-header">
+        <div class="post-detail-header-inner">
+
+            <a class="post-detail-logo" th:href="@{/}">
+                허걱슨닷컴
+            </a>
+
+            <nav class="post-detail-nav">
+                <a th:href="@{/}">홈</a>
+                <a th:href="@{/boards}">게시판</a>
+                <a th:href="@{/}">인기글</a>
+                <a th:href="@{/}">중고거래</a>
+            </nav>
+
+        </div>
+    </header>
+
+    <main class="post-detail-page">
+
+        <!-- 현재 게시판 경로 -->
+        <div class="post-breadcrumb">
+
+            <a th:href="@{/boards}">
+                전체 게시판
+            </a>
+
+            &gt;
+
+            <a th:href="@{/boards/{boardNo}(boardNo=${board.boardNo})}"
+               th:text="${board.boardName}">
+                게시판
+            </a>
+
+            &gt; 게시글 상세보기
+
+        </div>
+
+        <!-- 게시글 수정 성공 메시지 -->
+        <div class="post-message post-message-success"
+             th:if="${successMessage != null}"
+             th:text="${successMessage}">
+            성공 메시지
+        </div>
+
+        <!-- 게시글 처리 오류 메시지 -->
+        <div class="post-message post-message-error"
+             th:if="${errorMessage != null}"
+             th:text="${errorMessage}">
+            오류 메시지
+        </div>
+
+        <article>
+
+            <!-- 게시글 제목 및 정보 -->
+            <div class="post-heading">
+
+                <h1 th:text="${post.title}">
+                    게시글 제목
+                </h1>
+
+                <div class="post-meta">
+
+                    <!-- 게시글 작성자의 닉네임 표시 -->
+                    <span>
+                        작성자:
+                        <span th:text="${authorNickname}">
+                            작성자 닉네임
+                        </span>
+                    </span>
+
+                    <!-- 게시글 작성일 -->
+                    <span>
+                        작성일:
+                        <span th:text="${post.createdAt != null ? #temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm') : '-'}">
+                            작성일
+                        </span>
+                    </span>
+
+                    <!-- 게시글 조회수 -->
+                    <span>
+                        조회수:
+                        <span th:text="${post.viewCount}">
+                            0
+                        </span>
+                    </span>
+
+                </div>
+            </div>
+
+            <!-- DB에 저장된 게시글 내용 출력 -->
+            <div class="post-content"
+                 th:text="${post.content}">
+                게시글 내용
+            </div>
+
+        </article>
+
+        <!-- 게시글 하단 버튼 -->
+        <div class="post-actions">
+
+            <!-- 기존 목록 버튼 유지 -->
+            <a class="post-back-button"
+               th:href="@{/boards/{boardNo}(boardNo=${board.boardNo})}">
+                목록으로 돌아가기
+            </a>
+
+            <!-- 작성자 본인에게만 수정 및 삭제 버튼 표시 -->
+            <div class="post-owner-actions"
+                 th:if="${isOwner}">
+
+                <!-- 게시글 수정 화면으로 이동 -->
+                <a class="post-edit-button"
+                   th:href="@{/boards/{boardNo}/posts/{postNo}/edit(
+                       boardNo=${board.boardNo},
+                       postNo=${post.postNo}
+                   )}">
+                    수정
+                </a>
+
+                <!-- 게시글 삭제 요청 -->
+                <form method="post"
+                      th:action="@{/boards/{boardNo}/posts/{postNo}/delete(
+                          boardNo=${board.boardNo},
+                          postNo=${post.postNo}
+                      )}"
+                      onsubmit="return confirm('정말 이 게시글을 삭제하시겠습니까?');">
+
+                    <!-- CSRF 토큰 -->
+                    <input type="hidden"
+                           th:name="${_csrf.parameterName}"
+                           th:value="${_csrf.token}">
+
+                    <button type="submit"
+                            class="post-delete-button">
+                        삭제
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <footer class="post-detail-footer">
+        © 2026 HEOGEOKSEUN.COM
+    </footer>
+
+</body>
+</html>

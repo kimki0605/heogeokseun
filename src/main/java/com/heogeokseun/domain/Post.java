@@ -14,6 +14,10 @@ public class Post {
     // 게시글 작성자 회원 번호
     private Long memberNo;
 
+    // 게시글 작성자 닉네임 (MEMBER 테이블 JOIN 결과)
+    // POST 테이블에 직접 저장되는 컬럼은 아님
+    private String authorNickname;
+
     // 게시글 제목
     private String title;
 
@@ -36,6 +40,7 @@ public class Post {
     public Post() {
     }
 
+    // 게시글 고유 번호
     public Long getPostNo() {
         return postNo;
     }
@@ -44,6 +49,7 @@ public class Post {
         this.postNo = postNo;
     }
 
+    // 게시판 번호
     public Long getBoardNo() {
         return boardNo;
     }
@@ -52,6 +58,7 @@ public class Post {
         this.boardNo = boardNo;
     }
 
+    // 작성자 회원 번호
     public Long getMemberNo() {
         return memberNo;
     }
@@ -60,6 +67,16 @@ public class Post {
         this.memberNo = memberNo;
     }
 
+    // 작성자 닉네임
+    public String getAuthorNickname() {
+        return authorNickname;
+    }
+
+    public void setAuthorNickname(String authorNickname) {
+        this.authorNickname = authorNickname;
+    }
+
+    // 게시글 제목
     public String getTitle() {
         return title;
     }
@@ -68,6 +85,7 @@ public class Post {
         this.title = title;
     }
 
+    // 게시글 내용
     public String getContent() {
         return content;
     }
@@ -76,6 +94,7 @@ public class Post {
         this.content = content;
     }
 
+    // 조회수
     public Long getViewCount() {
         return viewCount;
     }
@@ -84,6 +103,7 @@ public class Post {
         this.viewCount = viewCount;
     }
 
+    // 게시글 상태
     public String getPostStatus() {
         return postStatus;
     }
@@ -92,6 +112,7 @@ public class Post {
         this.postStatus = postStatus;
     }
 
+    // 게시글 작성일
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -100,6 +121,7 @@ public class Post {
         this.createdAt = createdAt;
     }
 
+    // 게시글 수정일
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }

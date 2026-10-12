@@ -5,7 +5,7 @@
 
 <mapper namespace="com.heogeokseun.mapper.MemberMapper">
 
-    <!-- 회원가입 -->
+    <!-- 회원가입: 새로운 회원 정보를 DB에 저장 -->
     <insert id="insertMember"
             parameterType="com.heogeokseun.domain.Member">
 
@@ -32,28 +32,39 @@
 
     </insert>
 
-    <!-- 아이디 중복 검사 -->
+    <!-- 회원가입 시 아이디 중복 여부 확인 -->
     <select id="countByMemberId" resultType="int">
+
         SELECT COUNT(*)
         FROM MEMBER
         WHERE MEMBER_ID = #{memberId}
+
     </select>
 
-    <!-- 닉네임 중복 검사 -->
+    <!-- 회원가입 시 닉네임 중복 여부 확인 -->
     <select id="countByNickname" resultType="int">
+
         SELECT COUNT(*)
         FROM MEMBER
         WHERE NICKNAME = #{nickname}
+
     </select>
 
-    <!-- 이메일 중복 검사 -->
+    <!-- 회원가입 시 이메일 중복 여부 확인 -->
     <select id="countByEmail" resultType="int">
+
         SELECT COUNT(*)
         FROM MEMBER
         WHERE EMAIL = #{email}
+
     </select>
 
-    <!-- 로그인 시 회원 조회 -->
+    <!--
+        로그인 시 아이디로 회원 조회
+
+        비밀번호 검증과 회원 상태 확인은
+        기존 MemberService의 로그인 처리에서 수행한다.
+    -->
     <select id="findByMemberId"
             resultType="com.heogeokseun.domain.Member">
 
@@ -73,7 +84,14 @@
 
     </select>
 
-    <!-- 마이페이지: 최신 회원 정보 조회 -->
+    <!--
+        JWT 인증 및 마이페이지에서 사용하는 회원 조회
+
+        JWT에 저장된 회원 고유 번호로 DB를 조회한다.
+
+        STATUS = 'ACTIVE' 조건을 적용하여
+        탈퇴하거나 비활성화된 회원은 조회하지 않는다.
+    -->
     <select id="findByMemberNo"
             resultType="com.heogeokseun.domain.Member">
 
@@ -90,10 +108,16 @@
             NICKNAME_CHANGED_AT
         FROM MEMBER
         WHERE MEMBER_NO = #{memberNo}
+          AND STATUS = 'ACTIVE'
 
     </select>
 
-    <!-- 닉네임 변경: 30일 제한을 DB에서도 검사 -->
+    <!--
+        닉네임 변경
+
+        활성 회원만 변경할 수 있으며,
+        마지막 변경일로부터 30일이 지나야 다시 변경할 수 있다.
+    -->
     <update id="updateNickname">
 
         UPDATE MEMBER
@@ -109,7 +133,11 @@
 
     </update>
 
-    <!-- 프로필 이미지 경로 변경 -->
+    <!--
+        프로필 이미지 경로 변경
+
+        활성 회원만 프로필 이미지를 변경할 수 있다.
+    -->
     <update id="updateProfileImage">
 
         UPDATE MEMBER

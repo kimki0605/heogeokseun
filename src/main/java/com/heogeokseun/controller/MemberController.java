@@ -1,5 +1,8 @@
+
 package com.heogeokseun.controller;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,18 +10,25 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.heogeokseun.domain.Member;
+import com.heogeokseun.security.JwtTokenProvider;
 import com.heogeokseun.service.MemberService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class MemberController {
 
     private final MemberService memberService;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    // MemberService 의존성 주입
-    public MemberController(MemberService memberService) {
+    // 회원 서비스와 JWT 발급 객체를 생성자 주입받는다.
+    public MemberController(
+            MemberService memberService,
+            JwtTokenProvider jwtTokenProvider) {
+
         this.memberService = memberService;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     // =========================
@@ -63,8 +73,7 @@ public class MemberController {
         String verifiedEmail =
                 (String) session.getAttribute("emailVerificationTarget");
 
-        // 이메일 인증을 하지 않았거나
-        // 인증받은 이메일과 회원가입 이메일이 다르면 가입 차단
+        // 인증받은 이메일과 회원가입 이메일이 일치해야 한다.
         if (!Boolean.TRUE.equals(emailVerified)
                 || verifiedEmail == null
                 || !verifiedEmail.equals(member.getEmail())) {
@@ -110,12 +119,10 @@ public class MemberController {
             return "member/join";
         }
 
-        // 모든 검사를 통과하면 회원가입 처리
-        // MemberService에서 비밀번호를 BCrypt로 암호화한 뒤 DB에 저장
+        // 비밀번호를 BCrypt로 암호화한 뒤 회원 정보를 저장한다.
         memberService.join(member);
 
         // 사용이 끝난 이메일 인증정보 제거
-        // 같은 인증정보를 다시 사용하는 것을 방지
         session.removeAttribute("emailVerificationCode");
         session.removeAttribute("emailVerificationTarget");
         session.removeAttribute("emailVerified");
@@ -130,7 +137,6 @@ public class MemberController {
     @GetMapping("/login")
     public String loginForm() {
 
-        // templates/member/login.html 호출
         return "member/login";
     }
 
@@ -142,14 +148,15 @@ public class MemberController {
             @RequestParam String memberId,
             @RequestParam String memberPw,
             HttpSession session,
+            HttpServletResponse response,
             Model model) {
 
-        // 입력한 아이디와 비밀번호로 회원 조회
-        // MemberService 내부에서 BCrypt 비밀번호 비교까지 수행
+        // 아이디와 비밀번호를 검증한다.
+        // MemberService에서 BCrypt 비밀번호 비교를 수행한다.
         Member loginMember =
                 memberService.login(memberId, memberPw);
 
-        // 로그인 실패
+        // 로그인 실패 시 기존 오류 메시지를 표시한다.
         if (loginMember == null) {
 
             model.addAttribute(
@@ -160,8 +167,46 @@ public class MemberController {
             return "member/login";
         }
 
-        // 로그인 성공
-        // 로그인한 회원 정보를 세션에 저장
+        // =========================
+        // JWT Access Token 발급
+        // =========================
+
+        // 회원 고유번호를 JWT의 subject에 저장한다.
+        String accessToken =
+                jwtTokenProvider.createAccessToken(
+                        loginMember.getMemberNo()
+                );
+
+        // =========================
+        // JWT 쿠키 생성
+        // =========================
+
+        // HttpOnly: JavaScript에서 토큰을 직접 읽지 못하게 한다.
+        // SameSite=Lax: 일반적인 외부 사이트의 교차 출처 요청에서
+        // 쿠키 전송을 제한한다.
+        // Secure=false: 현재 localhost HTTP 개발 환경용 설정이다.
+        // 운영 HTTPS 환경에서는 반드시 Secure=true로 변경해야 한다.
+        ResponseCookie accessTokenCookie =
+                ResponseCookie.from("accessToken", accessToken)
+                        .httpOnly(true)
+                        .secure(false)
+                        .sameSite("Lax")
+                        .path("/")
+                        .maxAge(30 * 60)
+                        .build();
+
+        // 브라우저에 JWT 쿠키를 전달한다.
+        response.addHeader(
+                HttpHeaders.SET_COOKIE,
+                accessTokenCookie.toString()
+        );
+
+        // =========================
+        // 기존 세션 로그인 임시 유지
+        // =========================
+
+        // 기존 마이페이지 및 게시판 기능과의 호환성을 위해
+        // JWT 전환이 끝날 때까지 세션 로그인도 유지한다.
         session.setAttribute(
                 "loginMember",
                 loginMember
@@ -175,10 +220,31 @@ public class MemberController {
     // 로그아웃 처리
     // =========================
     @GetMapping("/logout")
-    public String logout(HttpSession session) {
+    public String logout(
+            HttpSession session,
+            HttpServletResponse response) {
 
-        // 현재 세션에 저장된 모든 정보 삭제
-        // loginMember도 함께 삭제되므로 로그아웃 처리됨
+        // =========================
+        // JWT 쿠키 삭제
+        // =========================
+
+        // 로그인 시 발급한 쿠키와 동일한 이름 및 경로를 사용하고,
+        // Max-Age를 0으로 설정해 브라우저에서 삭제한다.
+        ResponseCookie deleteAccessTokenCookie =
+                ResponseCookie.from("accessToken", "")
+                        .httpOnly(true)
+                        .secure(false)
+                        .sameSite("Lax")
+                        .path("/")
+                        .maxAge(0)
+                        .build();
+
+        response.addHeader(
+                HttpHeaders.SET_COOKIE,
+                deleteAccessTokenCookie.toString()
+        );
+
+        // 기존 세션 로그인 정보도 함께 삭제한다.
         session.invalidate();
 
         // 로그아웃 후 메인 페이지로 이동

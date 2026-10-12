@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Spring Security CSRF 토큰 -->
+	<meta name="_csrf" th:content="${_csrf.token}">
+	<meta name="_csrf_header" th:content="${_csrf.headerName}">
 
     <title>회원가입 | 허걱슨닷컴</title>
 
@@ -198,6 +202,11 @@
 
     <form action="/join" method="post" id="joinForm">
 
+    <!-- 회원가입 POST 요청용 CSRF 토큰 -->
+    <input type="hidden"
+           th:name="${_csrf.parameterName}"
+           th:value="${_csrf.token}">
+
         <div class="form-group">
             <label for="memberId">아이디</label>
 
@@ -367,16 +376,19 @@
 
         try {
 
-            const response = await fetch("/email/send", {
-                method: "POST",
-                headers: {
-                    "Content-Type":
-                        "application/x-www-form-urlencoded"
-                },
-                body:
-                    "email=" +
-                    encodeURIComponent(email)
-            });
+        	const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        	const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+        	const response = await fetch("/email/send", {
+        	    method: "POST",
+        	    headers: {
+        	        "Content-Type": "application/x-www-form-urlencoded",
+        	        [csrfHeader]: csrfToken
+        	    },
+        	    body:
+        	        "email=" +
+        	        encodeURIComponent(email)
+        	});
 
             const data = await response.json();
 
@@ -442,18 +454,21 @@
 
         try {
 
-            const response = await fetch("/email/verify", {
-                method: "POST",
-                headers: {
-                    "Content-Type":
-                        "application/x-www-form-urlencoded"
-                },
-                body:
-                    "email=" +
-                    encodeURIComponent(email) +
-                    "&code=" +
-                    encodeURIComponent(code)
-            });
+        	const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        	const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+        	const response = await fetch("/email/verify", {
+        	    method: "POST",
+        	    headers: {
+        	        "Content-Type": "application/x-www-form-urlencoded",
+        	        [csrfHeader]: csrfToken
+        	    },
+        	    body:
+        	        "email=" +
+        	        encodeURIComponent(email) +
+        	        "&code=" +
+        	        encodeURIComponent(code)
+        	});
 
             const data = await response.json();
 

@@ -1,6 +1,7 @@
 
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
     <link rel="stylesheet" th:href="@{/css/style.css(v=3)}">
 
     <style>
+        /* 게시판 전체 영역 */
         .board-detail-page {
             max-width: 1120px;
             min-height: 70vh;
@@ -19,6 +21,7 @@
             padding: 55px 24px 100px;
         }
 
+        /* 게시판 위치 안내 */
         .board-breadcrumb {
             margin-bottom: 25px;
             color: #64748b;
@@ -30,6 +33,7 @@
             text-decoration: none;
         }
 
+        /* 게시판 제목 및 글쓰기 */
         .board-detail-heading {
             display: flex;
             justify-content: space-between;
@@ -72,6 +76,7 @@
             background: #1d4ed8;
         }
 
+        /* 게시글 목록 제목 */
         .board-posts-title {
             margin-bottom: 18px;
             font-size: 21px;
@@ -79,6 +84,7 @@
             color: #111827;
         }
 
+        /* 게시글 목록 테이블 */
         .board-posts-table {
             width: 100%;
             border-collapse: collapse;
@@ -114,13 +120,22 @@
             color: #1e293b;
         }
 
-        .board-post-title span {
+        .post-title-link {
             display: block;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            color: #1e293b;
+            font-weight: 600;
+            text-decoration: none;
         }
 
+        .post-title-link:hover {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+
+        /* 게시글이 없을 때 */
         .board-posts-empty {
             padding: 75px 20px !important;
             color: #94a3b8 !important;
@@ -135,6 +150,100 @@
             font-size: 18px;
         }
 
+        /* ========================================
+           게시글 검색 영역
+           ======================================== */
+        .board-search-area {
+            display: flex;
+            justify-content: center;
+            margin-top: 32px;
+        }
+
+        .board-search-form {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .board-search-select {
+            height: 44px;
+            padding: 0 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            background: #ffffff;
+            color: #334155;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .board-search-input {
+            width: 320px;
+            max-width: 100%;
+            height: 44px;
+            padding: 0 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            background: #ffffff;
+            color: #334155;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .board-search-input:focus,
+        .board-search-select:focus {
+            border-color: #2563eb;
+        }
+
+        .board-search-button {
+            height: 44px;
+            padding: 0 22px;
+            border: none;
+            border-radius: 9px;
+            background: #2563eb;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .board-search-button:hover {
+            background: #1d4ed8;
+        }
+
+        .board-search-reset {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 44px;
+            padding: 0 18px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            background: #ffffff;
+            color: #334155;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .board-search-reset:hover {
+            background: #f8fafc;
+        }
+
+        /* 검색 결과 안내 */
+        .board-search-result {
+            margin-bottom: 18px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .board-search-result strong {
+            color: #2563eb;
+        }
+
+        /* 게시판 목록으로 돌아가기 */
         .board-detail-bottom {
             display: flex;
             justify-content: center;
@@ -155,6 +264,7 @@
             background: #f8fafc;
         }
 
+        /* 상단 헤더 */
         .board-detail-header {
             border-bottom: 1px solid #e2e8f0;
             background: #ffffff;
@@ -193,6 +303,7 @@
             color: #2563eb;
         }
 
+        /* 하단 푸터 */
         .board-detail-footer {
             padding: 30px 20px;
             border-top: 1px solid #e2e8f0;
@@ -201,6 +312,7 @@
             color: #94a3b8;
         }
 
+        /* 모바일 화면 대응 */
         @media (max-width: 650px) {
             .board-detail-page {
                 padding: 35px 16px 70px;
@@ -229,12 +341,75 @@
             .board-posts-table td:nth-child(4) {
                 display: none;
             }
+
+            .board-search-form {
+                justify-content: stretch;
+            }
+
+            .board-search-select {
+                flex: 1;
+            }
+
+            .board-search-input {
+                width: 100%;
+                flex-basis: 100%;
+            }
+
+            .board-search-button,
+            .board-search-reset {
+                flex: 1;
+            }
         }
+        
+        
+		/* ========================================
+   		게시글 페이징 버튼 디자인
+   		======================================== */
+		.board-pagination {
+    		display: flex;
+    		justify-content: center;
+    		align-items: center;
+    		flex-wrap: wrap;
+    		gap: 8px;
+    		margin-top: 32px;
+		}
+
+		.board-pagination a {
+		    display: inline-flex;
+		    justify-content: center;
+		    align-items: center;
+		    min-width: 40px;
+		    height: 40px;
+		    padding: 0 12px;
+		    border: 1px solid #cbd5e1;
+		    border-radius: 9px;
+		    background: #ffffff;
+		    color: #334155;
+		    font-size: 14px;
+		    font-weight: 600;
+		    text-decoration: none;
+		    transition: 0.2s;
+		}
+		
+		.board-pagination a:hover {
+		    border-color: #2563eb;
+		    color: #2563eb;
+		}
+		
+		.board-pagination a.active {
+		    border-color: #2563eb;
+		    background: #2563eb;
+		    color: #ffffff;
+		}
+        
     </style>
 </head>
 
 <body>
 
+    <!-- ========================================
+         사이트 상단 헤더
+         ======================================== -->
     <header class="board-detail-header">
         <div class="board-detail-header-inner">
 
@@ -252,18 +427,27 @@
         </div>
     </header>
 
+    <!-- ========================================
+         게시판 메인 영역
+         ======================================== -->
     <main class="board-detail-page">
 
+        <!-- 현재 게시판 위치 -->
         <div class="board-breadcrumb">
             <a th:href="@{/boards}">전체 게시판</a>
             &gt;
-            <span th:text="${board.boardName}">게시판 이름</span>
+            <span th:text="${board.boardName}">
+                게시판 이름
+            </span>
         </div>
 
+        <!-- 게시판 이름과 글쓰기 버튼 -->
         <section class="board-detail-heading">
 
             <div>
-                <h1 th:text="${board.boardName}">일상</h1>
+                <h1 th:text="${board.boardName}">
+                    일상
+                </h1>
 
                 <p th:text="${board.boardDescription}">
                     자유롭게 일상을 공유하는 공간
@@ -277,9 +461,24 @@
 
         </section>
 
+        <!-- ========================================
+             게시글 목록
+             ======================================== -->
         <section>
 
-            <h2 class="board-posts-title">게시글 목록</h2>
+            <h2 class="board-posts-title">
+                게시글 목록
+            </h2>
+
+            <!-- 검색한 경우 검색어와 결과 개수 표시 -->
+            <div class="board-search-result"
+                 th:if="${isSearch}">
+
+                '<strong th:text="${keyword}">검색어</strong>'
+                검색 결과
+                <strong th:text="${#lists.size(posts)}">0</strong>건
+
+            </div>
 
             <table class="board-posts-table">
 
@@ -295,37 +494,75 @@
 
                 <tbody>
 
+                    <!-- 게시글 목록 출력 -->
                     <tr th:each="post : ${posts}">
 
                         <td th:text="${post.postNo}">
                             1
                         </td>
 
+                        <!-- 게시글 상세 페이지로 이동 -->
                         <td class="board-post-title">
-                            <span th:text="${post.title}">
+
+                            <a class="post-title-link"
+                               th:href="@{/boards/{boardNo}/posts/{postNo}(
+                                   boardNo=${board.boardNo},
+                                   postNo=${post.postNo}
+                               )}"
+                               th:text="${post.title}">
+
                                 게시글 제목
-                            </span>
+
+                            </a>
+
                         </td>
 
-                        <td th:text="${post.memberNo}">
-                            작성자
+                        <!-- 작성자 닉네임 -->
+                        <td th:text="${post.authorNickname != null ? post.authorNickname : '알 수 없는 사용자'}">
+                            작성자 닉네임
                         </td>
 
+                        <!-- 작성일 -->
                         <td th:text="${post.createdAt != null ? #temporals.format(post.createdAt, 'yyyy-MM-dd') : '-'}">
                             2026-10-08
                         </td>
 
+                        <!-- 조회수 -->
                         <td th:text="${post.viewCount}">
                             0
                         </td>
 
                     </tr>
 
+                    <!-- 검색 결과 또는 게시글이 없는 경우 -->
                     <tr th:if="${#lists.isEmpty(posts)}">
+
                         <td colspan="5" class="board-posts-empty">
-                            <strong>아직 등록된 게시글이 없습니다.</strong>
-                            첫 번째 게시글을 기다리고 있어요!
+
+                            <!-- 검색했지만 결과가 없는 경우 -->
+                            <th:block th:if="${isSearch}">
+
+                                <strong>
+                                    검색 결과가 없습니다.
+                                </strong>
+
+                                다른 검색어로 다시 검색해 보세요!
+
+                            </th:block>
+
+                            <!-- 게시판에 글이 없는 경우 -->
+                            <th:block th:unless="${isSearch}">
+
+                                <strong>
+                                    아직 등록된 게시글이 없습니다.
+                                </strong>
+
+                                첫 번째 게시글을 기다리고 있어요!
+
+                            </th:block>
+
                         </td>
+
                     </tr>
 
                 </tbody>
@@ -333,15 +570,119 @@
             </table>
 
         </section>
+        
+        
+        <!-- ========================================
+             게시글 페이지 이동 버튼
+             ======================================== -->
+        <nav class="board-pagination"
+             aria-label="게시글 페이지 이동"
+             th:if="${totalPages > 1}">
 
+            <!-- 이전 페이지 -->
+            <a th:if="${hasPrevious}"
+               th:href="@{/boards/{boardNo}(
+                   boardNo=${board.boardNo},
+                   page=${currentPage - 1},
+                   searchType=${searchType},
+                   keyword=${keyword}
+               )}">
+                이전
+            </a>
+
+            <!-- 페이지 번호 -->
+            <a th:each="pageNo : ${#numbers.sequence(startPage, endPage)}"
+               th:href="@{/boards/{boardNo}(
+                   boardNo=${board.boardNo},
+                   page=${pageNo},
+                   searchType=${searchType},
+                   keyword=${keyword}
+               )}"
+               th:text="${pageNo}"
+               th:classappend="${pageNo == currentPage} ? ' active' : ''">
+                1
+            </a>
+
+            <!-- 다음 페이지 -->
+            <a th:if="${hasNext}"
+               th:href="@{/boards/{boardNo}(
+                   boardNo=${board.boardNo},
+                   page=${currentPage + 1},
+                   searchType=${searchType},
+                   keyword=${keyword}
+               )}">
+                다음
+            </a>
+
+        </nav>
+        
+
+        <!-- ========================================
+             게시글 검색창
+             GET 방식으로 BoardController에 전달
+             ======================================== -->
+        <section class="board-search-area">
+
+            <form class="board-search-form"
+                  method="get"
+                  th:action="@{/boards/{boardNo}(boardNo=${board.boardNo})}">
+
+                <!-- 검색 유형 -->
+                <select class="board-search-select"
+                        name="searchType"
+                        aria-label="검색 유형">
+
+                    <option value="title"
+                            th:selected="${searchType == 'title'}">
+                        제목
+                    </option>
+
+                    <option value="all"
+                            th:selected="${searchType == 'all'}">
+                        제목 + 내용
+                    </option>
+
+                </select>
+
+                <!-- 검색어 입력 -->
+                <input type="search"
+                       class="board-search-input"
+                       name="keyword"
+                       th:value="${keyword}"
+                       placeholder="검색어를 입력하세요"
+                       aria-label="게시글 검색어"
+                       maxlength="100"
+                       required>
+
+                <!-- 검색 실행 -->
+                <button type="submit"
+                        class="board-search-button">
+                    검색
+                </button>
+
+                <!-- 검색 조건 초기화 -->
+                <a class="board-search-reset"
+                   th:href="@{/boards/{boardNo}(boardNo=${board.boardNo})}">
+                    전체 글 보기
+                </a>
+
+            </form>
+
+        </section>
+
+        <!-- 전체 게시판 목록으로 이동 -->
         <div class="board-detail-bottom">
-            <a class="board-back-button" th:href="@{/boards}">
+
+            <a class="board-back-button"
+               th:href="@{/boards}">
                 전체 게시판으로
             </a>
+
         </div>
 
     </main>
 
+    <!-- 사이트 푸터 -->
     <footer class="board-detail-footer">
         © 2026 HEOGEOKSEUN.COM
     </footer>

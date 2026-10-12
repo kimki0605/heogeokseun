@@ -99,12 +99,19 @@
         <a th:href="@{/}" class="logo">허걱슨닷컴</a>
 
         <!-- 메인 메뉴 -->
-        <nav class="nav">
-            <a th:href="@{/}">홈</a>
-            <a href="#">게시판</a>
-            <a href="#">인기글</a>
-            <a href="#">중고거래</a>
-        </nav>
+		<nav class="nav">
+
+    		<!-- 메인 홈페이지 -->
+    		<a th:href="@{/}">홈</a>
+
+    		<!-- 실제 게시판 목록 페이지로 이동 -->
+    		<a th:href="@{/boards}">게시판</a>
+
+    		<!-- 아직 기능이 연결되지 않은 메뉴 -->
+    		<a href="#">인기글</a>
+    		<a href="#">중고거래</a>
+
+		</nav>
 
         <!-- 검색창: 게시글 검색 기능 연결 전 UI -->
         <div class="header-search" role="search">
@@ -203,6 +210,7 @@
 
 </section>
 
+
 <!-- =========================
      커뮤니티 카테고리
 ========================= -->
@@ -215,37 +223,44 @@
 
     <div class="category-grid">
 
-        <a href="#" class="category-card">
+        <!-- 일상 게시판 -->
+        <a th:href="@{/boards/1}" class="category-card">
             <div class="category-icon">☕</div>
             <h3>일상</h3>
             <p>소소한 하루의 이야기를 공유해요.</p>
         </a>
 
-        <a href="#" class="category-card">
+        <!-- 스포츠 게시판 -->
+        <a th:href="@{/boards/2}" class="category-card">
             <div class="category-icon">⚽</div>
             <h3>스포츠</h3>
             <p>좋아하는 스포츠 이야기를 나눠요.</p>
         </a>
 
-        <a href="#" class="category-card">
+        <!-- 연애 게시판 -->
+        <a th:href="@{/boards/3}" class="category-card">
             <div class="category-icon">💗</div>
             <h3>연애</h3>
             <p>다양한 고민과 이야기를 나눠요.</p>
         </a>
 
-        <a href="#" class="category-card">
+        <!-- 취업 / 구직 게시판 -->
+        <a th:href="@{/boards/4}" class="category-card">
             <div class="category-icon">💼</div>
             <h3>취업 / 구직</h3>
             <p>취업 정보와 경험을 공유해요.</p>
         </a>
 
-        <a href="#" class="category-card">
+        <!-- 중고거래 게시판 -->
+        <a th:href="@{/boards/5}" class="category-card">
             <div class="category-icon">🛍️</div>
             <h3>중고거래</h3>
             <p>필요한 물건을 사고팔아요.</p>
         </a>
 
-        <a href="#" class="category-card">
+        <!-- 취미 게시판 -->
+        <!-- 실제 게시판 번호 확인 전까지 목록으로 연결 -->
+        <a th:href="@{/boards/6}" class="category-card">
             <div class="category-icon">🎮</div>
             <h3>취미</h3>
             <p>공통 관심사를 가진 사람들과 소통해요.</p>
@@ -255,9 +270,11 @@
 
 </section>
 
+
+
 <!-- =========================
      최신 게시글
-     현재는 화면 확인용 예시 데이터
+     Oracle DB 실제 데이터 출력
 ========================= -->
 <section class="posts-section container">
 
@@ -268,37 +285,69 @@
 
     <div class="post-list">
 
-        <div class="post-item">
-            <span class="post-category">일상</span>
+        <!-- 게시글이 존재하는 경우 -->
+        <div th:each="post : ${latestPosts}"
+             class="post-item">
+
+            <!-- 게시판 카테고리 -->
+            <span class="post-category"
+                  th:switch="${post.boardNo}">
+
+                <span th:case="1">일상</span>
+                <span th:case="2">스포츠</span>
+                <span th:case="3">연애</span>
+                <span th:case="4">취업 / 구직</span>
+                <span th:case="5">중고거래</span>
+                <span th:case="6">취미</span>
+                <span th:case="*">기타</span>
+
+            </span>
+
+            <!-- 게시글 내용 -->
             <div class="post-content">
-                <h3>오늘 하루 다들 어떻게 보내셨나요?</h3>
-                <p>자유롭게 일상을 나눠보세요.</p>
+
+                <!-- 제목 클릭 시 상세 페이지 이동 -->
+                <h3>
+                    <a th:href="@{/boards/{boardNo}/posts/{postNo}(
+                            boardNo=${post.boardNo},
+                            postNo=${post.postNo}
+                        )}"
+                       th:text="${post.title}"
+                       style="color: inherit; text-decoration: none;">
+
+                        게시글 제목
+
+                    </a>
+                </h3>
+
+                <!-- 작성자 닉네임 -->
+                <p th:text="|작성자: ${post.authorNickname != null ? post.authorNickname : '알 수 없는 사용자'}|">
+                    작성자: 사용자
+                </p>
+
             </div>
+
         </div>
 
-        <div class="post-item">
-            <span class="post-category">스포츠</span>
-            <div class="post-content">
-                <h3>요즘 가장 재미있게 보는 스포츠는?</h3>
-                <p>좋아하는 팀과 경기를 이야기해요.</p>
-            </div>
-        </div>
+        <!-- 게시글이 없는 경우 -->
+        <div class="post-item"
+             th:if="${latestPosts == null or #lists.isEmpty(latestPosts)}">
 
-        <div class="post-item">
-            <span class="post-category">취미</span>
             <div class="post-content">
-                <h3>새로운 취미를 추천해주세요!</h3>
-                <p>여러분의 취미 생활을 소개해주세요.</p>
+                <h3>아직 등록된 게시글이 없습니다.</h3>
+                <p>첫 번째 이야기를 작성해 보세요!</p>
             </div>
+
         </div>
 
     </div>
 
 </section>
 
+
 <!-- =========================
      인기 게시글
-     현재는 화면 확인용 예시 데이터
+     Oracle DB 조회수 기준 실제 데이터 출력
 ========================= -->
 <section class="posts-section container">
 
@@ -309,25 +358,71 @@
 
     <div class="post-list">
 
-        <div class="post-item">
-            <span class="post-category">인기</span>
+        <!-- 인기 게시글이 존재하는 경우 -->
+        <div th:each="post : ${popularPosts}"
+             class="post-item">
+
+            <!-- 게시판 카테고리 -->
+            <span class="post-category"
+                  th:switch="${post.boardNo}">
+
+                <span th:case="1">일상</span>
+                <span th:case="2">스포츠</span>
+                <span th:case="3">연애</span>
+                <span th:case="4">취업 / 구직</span>
+                <span th:case="5">중고거래</span>
+                <span th:case="6">취미</span>
+                <span th:case="*">기타</span>
+
+            </span>
+
+            <!-- 게시글 정보 -->
             <div class="post-content">
-                <h3>요즘 가장 재미있는 취미 추천 모음</h3>
-                <p>다양한 취미를 함께 알아봐요.</p>
+
+                <!-- 게시글 제목 클릭 시 상세 페이지 이동 -->
+                <h3>
+                    <a th:href="@{/boards/{boardNo}/posts/{postNo}(
+                            boardNo=${post.boardNo},
+                            postNo=${post.postNo}
+                        )}"
+                       th:text="${post.title}"
+                       style="color: inherit; text-decoration: none;">
+
+                        게시글 제목
+
+                    </a>
+                </h3>
+
+                <!-- 작성자 닉네임 및 조회수 -->
+                <p>
+                    <span th:text="|작성자: ${post.authorNickname != null ? post.authorNickname : '알 수 없는 사용자'}|">
+                        작성자: 사용자
+                    </span>
+
+                    <span th:text="| · 조회수: ${post.viewCount}|">
+                        · 조회수: 0
+                    </span>
+                </p>
+
             </div>
+
         </div>
 
-        <div class="post-item">
-            <span class="post-category">인기</span>
+        <!-- 인기 게시글이 없는 경우 -->
+        <div class="post-item"
+             th:if="${popularPosts == null or #lists.isEmpty(popularPosts)}">
+
             <div class="post-content">
-                <h3>중고거래할 때 알아두면 좋은 팁</h3>
-                <p>안전하고 편리한 거래를 위한 이야기예요.</p>
+                <h3>아직 인기 게시글이 없습니다.</h3>
+                <p>게시글을 읽고 다양한 이야기를 나눠보세요!</p>
             </div>
+
         </div>
 
     </div>
 
 </section>
+
 
 <!-- =========================
      하단 참여 안내

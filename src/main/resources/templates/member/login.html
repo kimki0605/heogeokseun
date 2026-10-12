@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 
@@ -50,11 +51,9 @@
             padding: 40px;
 
             background: white;
-
             border-radius: 16px;
 
-            box-shadow:
-                0 5px 20px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
         }
 
         /* 로그인 제목 */
@@ -78,7 +77,6 @@
             color: #dc2626;
 
             padding: 12px;
-
             border-radius: 8px;
 
             margin-bottom: 20px;
@@ -113,7 +111,6 @@
             border-radius: 8px;
 
             font-size: 15px;
-
             outline: none;
         }
 
@@ -137,7 +134,6 @@
             font-weight: bold;
 
             cursor: pointer;
-
             margin-top: 10px;
         }
 
@@ -187,7 +183,7 @@
 <header>
 
     <!-- 로고 클릭 시 메인 페이지로 이동 -->
-    <a href="/" class="logo">
+    <a th:href="@{/}" class="logo">
         허걱슨닷컴
     </a>
 
@@ -204,13 +200,7 @@
     </p>
 
 
-    <!--
-        로그인에 실패했을 때만 출력됨.
-
-        MemberController에서
-        model.addAttribute("errorMessage", ...)
-        로 전달한 메시지가 여기에 표시됨.
-    -->
+    <!-- 로그인 실패 시 컨트롤러에서 전달한 메시지 출력 -->
     <div
         class="error-message"
         th:if="${errorMessage}"
@@ -221,13 +211,28 @@
     <!--
         로그인 폼
 
-        POST 방식으로 /login에 요청을 보냄.
-        name 값은 MemberController의
-        @RequestParam 이름과 동일해야 함.
+        POST /login 요청을 기존 MemberController에 전달한다.
+        th:action을 사용해 Thymeleaf와 Spring Security가
+        로그인 요청을 올바르게 처리하도록 한다.
     -->
     <form
-        action="/login"
+        th:action="@{/login}"
         method="post">
+
+        <!--
+            CSRF 보안 토큰
+
+            Spring Security가 생성한 토큰을 POST 요청에 포함한다.
+            이를 통해 다른 사이트에서 사용자의 브라우저를 이용해
+            원하지 않는 요청을 보내는 공격을 방지한다.
+
+            토큰은 서버에서 생성하므로 직접 값을 입력하지 않는다.
+        -->
+        <input
+            type="hidden"
+            th:name="${_csrf.parameterName}"
+            th:value="${_csrf.token}">
+
 
         <!-- 아이디 -->
         <div class="form-group">
@@ -282,7 +287,7 @@
 
         아직 계정이 없나요?
 
-        <a href="/join">
+        <a th:href="@{/join}">
             회원가입
         </a>
 
@@ -292,7 +297,7 @@
     <!-- 메인 페이지 이동 -->
     <div class="home-link">
 
-        <a href="/">
+        <a th:href="@{/}">
             메인으로 돌아가기
         </a>
 
