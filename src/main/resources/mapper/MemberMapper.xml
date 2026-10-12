@@ -5,6 +5,7 @@
 
 <mapper namespace="com.heogeokseun.mapper.MemberMapper">
 
+    <!-- 회원가입 -->
     <insert id="insertMember"
             parameterType="com.heogeokseun.domain.Member">
 
@@ -31,38 +32,29 @@
 
     </insert>
 
-    <select id="countByMemberId"
-            parameterType="string"
-            resultType="int">
-
+    <!-- 아이디 중복 검사 -->
+    <select id="countByMemberId" resultType="int">
         SELECT COUNT(*)
         FROM MEMBER
         WHERE MEMBER_ID = #{memberId}
-
     </select>
 
-    <select id="countByNickname"
-            parameterType="string"
-            resultType="int">
-
+    <!-- 닉네임 중복 검사 -->
+    <select id="countByNickname" resultType="int">
         SELECT COUNT(*)
         FROM MEMBER
         WHERE NICKNAME = #{nickname}
-
     </select>
 
-    <select id="countByEmail"
-            parameterType="string"
-            resultType="int">
-
+    <!-- 이메일 중복 검사 -->
+    <select id="countByEmail" resultType="int">
         SELECT COUNT(*)
         FROM MEMBER
         WHERE EMAIL = #{email}
-
     </select>
 
+    <!-- 로그인 시 회원 조회 -->
     <select id="findByMemberId"
-            parameterType="string"
             resultType="com.heogeokseun.domain.Member">
 
         SELECT
@@ -73,10 +65,58 @@
             EMAIL,
             ROLE,
             STATUS,
-            CREATED_AT
+            CREATED_AT,
+            PROFILE_IMAGE,
+            NICKNAME_CHANGED_AT
         FROM MEMBER
         WHERE MEMBER_ID = #{memberId}
 
     </select>
+
+    <!-- 마이페이지: 최신 회원 정보 조회 -->
+    <select id="findByMemberNo"
+            resultType="com.heogeokseun.domain.Member">
+
+        SELECT
+            MEMBER_NO,
+            MEMBER_ID,
+            MEMBER_PW,
+            NICKNAME,
+            EMAIL,
+            ROLE,
+            STATUS,
+            CREATED_AT,
+            PROFILE_IMAGE,
+            NICKNAME_CHANGED_AT
+        FROM MEMBER
+        WHERE MEMBER_NO = #{memberNo}
+
+    </select>
+
+    <!-- 닉네임 변경: 30일 제한을 DB에서도 검사 -->
+    <update id="updateNickname">
+
+        UPDATE MEMBER
+        SET NICKNAME = #{nickname},
+            NICKNAME_CHANGED_AT = SYSDATE
+        WHERE MEMBER_NO = #{memberNo}
+          AND STATUS = 'ACTIVE'
+          AND (
+              NICKNAME_CHANGED_AT IS NULL
+              OR NICKNAME_CHANGED_AT &lt;= SYSDATE - 30
+          )
+          AND NICKNAME != #{nickname}
+
+    </update>
+
+    <!-- 프로필 이미지 경로 변경 -->
+    <update id="updateProfileImage">
+
+        UPDATE MEMBER
+        SET PROFILE_IMAGE = #{profileImage}
+        WHERE MEMBER_NO = #{memberNo}
+          AND STATUS = 'ACTIVE'
+
+    </update>
 
 </mapper>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.heogeokseun.mapper.BoardMapper">
+
+    <!-- 게시판 테이블과 Java 객체 연결 -->
+    <resultMap id="boardResultMap"
+               type="com.heogeokseun.domain.Board">
+
+        <id property="boardNo" column="BOARD_NO"/>
+
+        <result property="boardName"
+                column="BOARD_NAME"/>
+
+        <result property="boardDescription"
+                column="BOARD_DESCRIPTION"/>
+
+        <result property="boardStatus"
+                column="BOARD_STATUS"/>
+
+        <result property="createdAt"
+                column="CREATED_AT"/>
+
+    </resultMap>
+
+    <!-- 활성화된 게시판 전체 조회 -->
+    <select id="findAllActiveBoards"
+            resultMap="boardResultMap">
+
+        SELECT
+            BOARD_NO,
+            BOARD_NAME,
+            BOARD_DESCRIPTION,
+            BOARD_STATUS,
+            CREATED_AT
+        FROM BOARD
+        WHERE BOARD_STATUS = 'ACTIVE'
+        ORDER BY BOARD_NO ASC
+
+    </select>
+
+    <!-- 게시판 번호로 상세 조회 -->
+    <select id="findByBoardNo"
+            parameterType="java.lang.Long"
+            resultMap="boardResultMap">
+
+        SELECT
+            BOARD_NO,
+            BOARD_NAME,
+            BOARD_DESCRIPTION,
+            BOARD_STATUS,
+            CREATED_AT
+        FROM BOARD
+        WHERE BOARD_NO = #{boardNo}
+          AND BOARD_STATUS = 'ACTIVE'
+
+    </select>
+
+</mapper>

@@ -1,0 +1,675 @@
+
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마이페이지 | 허걱슨닷컴</title>
+
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <style>
+        /* 마이페이지 전체 영역 */
+        .mypage-container {
+            max-width: 1100px;
+            margin: 50px auto 80px;
+            padding: 0 20px;
+        }
+
+        .page-title {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .page-description {
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+
+        /* 프로필 영역 */
+        .profile-card {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            padding: 32px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+
+        .profile-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #eaf1ff;
+            flex-shrink: 0;
+        }
+
+        .default-profile {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 42px;
+            color: #2563eb;
+        }
+
+        .profile-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .profile-info h2 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .profile-info p {
+            color: #6b7280;
+            margin-top: 5px;
+            overflow-wrap: anywhere;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .mypage-button {
+            display: inline-block;
+            padding: 11px 16px;
+            background: #2563eb;
+            color: white;
+            border: 0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .mypage-button.secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .mypage-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 프로필 사진 변경 영역 */
+        .profile-upload-box {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+        }
+
+        .profile-upload-box h2 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        .upload-description {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 18px;
+        }
+
+        .profile-upload-form {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .profile-file-input {
+            max-width: 100%;
+            font-size: 14px;
+        }
+
+        .profile-preview {
+            display: none;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #dbeafe;
+            margin-top: 18px;
+        }
+
+        /* 닉네임 변경 영역 */
+        .nickname-box {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+        }
+
+        .nickname-box h2 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        .nickname-description {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 18px;
+            line-height: 1.6;
+        }
+
+        .nickname-form {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nickname-input {
+            flex: 1;
+            min-width: 180px;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .nickname-input:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        /* 성공 / 오류 메시지 */
+        .message {
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .success-message {
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .error-message {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        /* 활동 메뉴 */
+        .mypage-section {
+            margin-top: 35px;
+        }
+
+        .mypage-section h2 {
+            font-size: 22px;
+            margin-bottom: 16px;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .menu-card {
+            display: block;
+            padding: 25px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            color: #222;
+            transition: 0.2s;
+        }
+
+        .menu-card:hover {
+            border-color: #2563eb;
+            transform: translateY(-3px);
+        }
+
+        .menu-icon {
+            font-size: 30px;
+            margin-bottom: 15px;
+        }
+
+        .menu-card h3 {
+            font-size: 17px;
+            margin-bottom: 8px;
+        }
+
+        .menu-card p {
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        /* 계정 정보 */
+        .account-box {
+            background: white;
+            padding: 25px;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+        }
+
+        .account-row {
+            display: flex;
+            gap: 20px;
+            padding: 14px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .account-row:last-child {
+            border-bottom: none;
+        }
+
+        .account-label {
+            width: 110px;
+            flex-shrink: 0;
+            color: #6b7280;
+        }
+
+        .account-value {
+            overflow-wrap: anywhere;
+        }
+
+        @media (max-width: 800px) {
+            .profile-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .menu-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 520px) {
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-actions {
+                width: 100%;
+            }
+
+            .account-row {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .nickname-form {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- 상단 헤더 -->
+<header class="header">
+    <div class="header-inner">
+
+        <a th:href="@{/}" class="logo">허걱슨닷컴</a>
+
+        <nav class="nav">
+            <a th:href="@{/}">홈</a>
+            <a href="#">게시판</a>
+            <a href="#">인기글</a>
+            <a href="#">중고거래</a>
+        </nav>
+
+        <div class="header-right">
+            <a th:href="@{/}" class="login-btn">메인으로</a>
+            <a th:href="@{/logout}" class="signup-btn">로그아웃</a>
+        </div>
+
+    </div>
+</header>
+
+<main class="mypage-container">
+
+    <h1 class="page-title">마이페이지</h1>
+
+    <p class="page-description">
+        내 활동과 프로필 정보를 관리할 수 있어요.
+    </p>
+
+    <!-- 성공 메시지 -->
+    <div th:if="${successMessage}"
+         class="message success-message"
+         th:text="${successMessage}">
+    </div>
+
+    <!-- 오류 메시지 -->
+    <div th:if="${errorMessage}"
+         class="message error-message"
+         th:text="${errorMessage}">
+    </div>
+
+    <!-- 회원 프로필 -->
+    <section class="profile-card">
+
+        <!-- 등록된 프로필 사진 -->
+        <img
+            th:if="${member.profileImage != null and !#strings.isEmpty(member.profileImage)}"
+            th:src="${member.profileImage}"
+            alt="프로필 사진"
+            class="profile-image">
+
+        <!-- 기본 프로필 아이콘 -->
+        <div
+            th:unless="${member.profileImage != null and !#strings.isEmpty(member.profileImage)}"
+            class="profile-image default-profile">
+            👤
+        </div>
+
+        <div class="profile-info">
+            <h2 th:text="|${member.nickname}님|">사용자님</h2>
+            <p th:text="${member.email}">example@email.com</p>
+            <p th:text="|아이디: ${member.memberId}|">아이디</p>
+        </div>
+
+        <div class="profile-actions">
+
+            <!-- 프로필 사진 변경 영역으로 이동 -->
+            <a href="#profile-upload-section"
+               class="mypage-button">
+                프로필 사진 변경
+            </a>
+
+            <!-- 닉네임 변경 영역으로 이동 -->
+            <a href="#nickname-section"
+               class="mypage-button secondary">
+                닉네임 변경
+            </a>
+
+        </div>
+
+    </section>
+
+    <!-- 프로필 사진 업로드 -->
+    <section id="profile-upload-section"
+             class="profile-upload-box">
+
+        <h2>프로필 사진 변경</h2>
+
+        <p class="upload-description">
+            JPG, PNG 이미지를 업로드할 수 있습니다.
+            파일 크기는 최대 5MB입니다.
+            이미지를 선택하면 미리보기가 표시됩니다.
+        </p>
+
+        <!-- 컨트롤러의 업로드 주소와 연결 -->
+        <form
+            id="profileUploadForm"
+            class="profile-upload-form"
+            th:action="@{/mypage/profile-image}"
+            method="post"
+            enctype="multipart/form-data">
+
+            <!-- name은 컨트롤러의 @RequestParam과 일치해야 함 -->
+            <input
+                type="file"
+                id="profileImageInput"
+                name="profileImage"
+                class="profile-file-input"
+                accept="image/jpeg,image/png"
+                required>
+
+            <button type="submit"
+                    class="mypage-button">
+                사진 저장하기
+            </button>
+
+        </form>
+
+        <!-- 선택한 사진 미리보기 -->
+        <img id="profilePreview"
+             class="profile-preview"
+             alt="선택한 프로필 사진 미리보기">
+
+    </section>
+
+    <!-- 닉네임 변경 -->
+    <section id="nickname-section" class="nickname-box">
+
+        <h2>닉네임 변경</h2>
+
+        <p class="nickname-description">
+            닉네임은 변경한 날부터 30일이 지나야 다시 변경할 수 있습니다.
+            다른 회원이 사용 중인 닉네임은 사용할 수 없습니다.
+        </p>
+
+        <p class="nickname-description"
+           th:if="${member.nicknameChangedAt == null}">
+            현재 닉네임 변경 이력이 없습니다.
+        </p>
+
+        <p class="nickname-description"
+           th:if="${member.nicknameChangedAt != null}"
+           th:text="|마지막 변경일: ${#temporals.format(member.nicknameChangedAt, 'yyyy-MM-dd HH:mm')}|">
+        </p>
+
+        <form class="nickname-form"
+              th:action="@{/mypage/nickname}"
+              method="post">
+
+            <input type="text"
+                   name="nickname"
+                   class="nickname-input"
+                   placeholder="새 닉네임 입력"
+                   maxlength="30"
+                   required>
+
+            <button type="submit"
+                    class="mypage-button">
+                변경하기
+            </button>
+
+        </form>
+
+    </section>
+
+    <!-- 내 활동 -->
+    <section class="mypage-section">
+
+        <h2>내 활동</h2>
+
+        <div class="menu-grid">
+
+            <div class="menu-card">
+                <div class="menu-icon">📝</div>
+                <h3>내가 작성한 글</h3>
+                <p>내가 작성한 게시글을 확인하고 관리해요.</p>
+            </div>
+
+            <div class="menu-card">
+                <div class="menu-icon">💬</div>
+                <h3>내가 작성한 댓글</h3>
+                <p>내가 남긴 댓글을 모아서 확인해요.</p>
+            </div>
+
+            <div class="menu-card">
+                <div class="menu-icon">🔖</div>
+                <h3>내가 저장한 글</h3>
+                <p>저장한 게시글을 확인해요.</p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 중고거래 -->
+    <section class="mypage-section">
+
+        <h2>중고거래</h2>
+
+        <div class="menu-grid">
+
+            <div class="menu-card">
+                <div class="menu-icon">🛍️</div>
+                <h3>내가 구매한 물건</h3>
+                <p>구매 내역을 확인해요.</p>
+            </div>
+
+            <div class="menu-card">
+                <div class="menu-icon">📦</div>
+                <h3>내가 판매한 물건</h3>
+                <p>판매 내역을 관리해요.</p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 계정 정보 -->
+    <section class="mypage-section">
+
+        <h2>계정 정보</h2>
+
+        <div class="account-box">
+
+            <div class="account-row">
+                <span class="account-label">아이디</span>
+                <strong class="account-value"
+                        th:text="${member.memberId}">
+                    아이디
+                </strong>
+            </div>
+
+            <div class="account-row">
+                <span class="account-label">닉네임</span>
+                <strong class="account-value"
+                        th:text="${member.nickname}">
+                    닉네임
+                </strong>
+            </div>
+
+            <div class="account-row">
+                <span class="account-label">이메일</span>
+                <strong class="account-value"
+                        th:text="${member.email}">
+                    이메일
+                </strong>
+            </div>
+
+            <div class="account-row">
+                <span class="account-label">가입일</span>
+                <strong class="account-value"
+                        th:text="${member.createdAt != null ? #temporals.format(member.createdAt, 'yyyy-MM-dd') : '-'}">
+                    가입일
+                </strong>
+            </div>
+
+            <div class="account-row">
+                <span class="account-label">닉네임 변경일</span>
+                <strong class="account-value"
+                        th:text="${member.nicknameChangedAt != null ? #temporals.format(member.nicknameChangedAt, 'yyyy-MM-dd') : '변경 이력 없음'}">
+                    변경 이력 없음
+                </strong>
+            </div>
+
+        </div>
+    </section>
+
+</main>
+
+<!-- 푸터 -->
+<footer class="footer">
+    <div class="container footer-inner">
+
+        <div>
+            <strong>허걱슨닷컴</strong>
+            <p>관심사를 모으고, 일상을 나누다.</p>
+        </div>
+
+        <p>© 2026 HEOGEOKSEUN.COM</p>
+
+    </div>
+</footer>
+
+<!-- 프로필 사진 선택 및 미리보기 -->
+<script>
+    const profileImageInput =
+        document.getElementById("profileImageInput");
+
+    const profilePreview =
+        document.getElementById("profilePreview");
+
+    const profileUploadForm =
+        document.getElementById("profileUploadForm");
+
+    const maxFileSize = 5 * 1024 * 1024;
+
+    const allowedTypes = [
+        "image/jpeg",
+        "image/png"
+    ];
+
+    let previewUrl = null;
+
+    // 이미지 선택 시 미리보기
+    profileImageInput.addEventListener("change", function () {
+
+        const file = this.files[0];
+
+        // 기존 미리보기 URL 해제
+        if (previewUrl !== null) {
+            URL.revokeObjectURL(previewUrl);
+            previewUrl = null;
+        }
+
+        profilePreview.style.display = "none";
+        profilePreview.removeAttribute("src");
+
+        if (!file) {
+            return;
+        }
+
+        // 이미지 형식 검사
+        if (!allowedTypes.includes(file.type)) {
+            alert("JPG 또는 PNG 이미지만 선택할 수 있습니다.");
+            this.value = "";
+            return;
+        }
+
+        // 파일 크기 검사
+        if (file.size > maxFileSize) {
+            alert("프로필 사진은 최대 5MB까지 업로드할 수 있습니다.");
+            this.value = "";
+            return;
+        }
+
+        // 선택한 이미지 미리보기
+        previewUrl = URL.createObjectURL(file);
+
+        profilePreview.src = previewUrl;
+        profilePreview.style.display = "block";
+    });
+
+    // 파일을 선택하지 않은 상태로 제출하는 것 방지
+    profileUploadForm.addEventListener("submit", function (event) {
+
+        if (!profileImageInput.files.length) {
+            event.preventDefault();
+            alert("프로필 사진을 선택해주세요.");
+        }
+    });
+
+    // 페이지를 벗어날 때 미리보기 URL 정리
+    window.addEventListener("pagehide", function () {
+
+        if (previewUrl !== null) {
+            URL.revokeObjectURL(previewUrl);
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.heogeokseun.mapper.PostMapper">
+
+    <!-- ========================================
+         POST 테이블과 Java 객체 연결
+         ======================================== -->
+    <resultMap id="postResultMap"
+               type="com.heogeokseun.domain.Post">
+
+        <id property="postNo" column="POST_NO"/>
+
+        <result property="boardNo" column="BOARD_NO"/>
+
+        <result property="memberNo" column="MEMBER_NO"/>
+
+        <result property="title" column="TITLE"/>
+
+        <result property="content" column="CONTENT"/>
+
+        <result property="viewCount" column="VIEW_COUNT"/>
+
+        <result property="postStatus" column="POST_STATUS"/>
+
+        <result property="createdAt" column="CREATED_AT"/>
+
+        <result property="updatedAt" column="UPDATED_AT"/>
+
+    </resultMap>
+
+    <!-- ========================================
+         특정 게시판의 게시글 목록 조회
+         ======================================== -->
+    <select id="findByBoardNo"
+            resultMap="postResultMap">
+
+        SELECT
+            POST_NO,
+            BOARD_NO,
+            MEMBER_NO,
+            TITLE,
+            CONTENT,
+            VIEW_COUNT,
+            POST_STATUS,
+            CREATED_AT,
+            UPDATED_AT
+        FROM POST
+        WHERE BOARD_NO = #{boardNo}
+          AND POST_STATUS = 'ACTIVE'
+        ORDER BY CREATED_AT DESC, POST_NO DESC
+
+    </select>
+
+    <!-- ========================================
+         게시글 번호로 상세 조회
+         ======================================== -->
+    <select id="findByPostNo"
+            resultMap="postResultMap">
+
+        SELECT
+            POST_NO,
+            BOARD_NO,
+            MEMBER_NO,
+            TITLE,
+            CONTENT,
+            VIEW_COUNT,
+            POST_STATUS,
+            CREATED_AT,
+            UPDATED_AT
+        FROM POST
+        WHERE POST_NO = #{postNo}
+          AND POST_STATUS = 'ACTIVE'
+
+    </select>
+
+    <!-- ========================================
+         새 게시글 등록
+         ======================================== -->
+    <insert id="insertPost"
+            parameterType="com.heogeokseun.domain.Post">
+
+        <selectKey keyProperty="postNo"
+                   resultType="java.lang.Long"
+                   order="BEFORE">
+            SELECT SEQ_POST.NEXTVAL FROM DUAL
+        </selectKey>
+
+        INSERT INTO POST (
+            POST_NO,
+            BOARD_NO,
+            MEMBER_NO,
+            TITLE,
+            CONTENT,
+            VIEW_COUNT,
+            POST_STATUS,
+            CREATED_AT
+        ) VALUES (
+            #{postNo},
+            #{boardNo},
+            #{memberNo},
+            #{title},
+            #{content},
+            0,
+            'ACTIVE',
+            SYSDATE
+        )
+
+    </insert>
+
+    <!-- ========================================
+         게시글 조회수 증가
+         ======================================== -->
+    <update id="increaseViewCount">
+
+        UPDATE POST
+        SET VIEW_COUNT = VIEW_COUNT + 1
+        WHERE POST_NO = #{postNo}
+          AND POST_STATUS = 'ACTIVE'
+
+    </update>
+
+    <!-- ========================================
+         게시글 수정
+         작성자 본인만 수정 가능
+         ======================================== -->
+    <update id="updatePost"
+            parameterType="com.heogeokseun.domain.Post">
+
+        UPDATE POST
+        SET
+            TITLE = #{title},
+            CONTENT = #{content},
+            UPDATED_AT = SYSDATE
+        WHERE POST_NO = #{postNo}
+          AND MEMBER_NO = #{memberNo}
+          AND POST_STATUS = 'ACTIVE'
+
+    </update>
+
+    <!-- ========================================
+         게시글 삭제 (소프트 삭제)
+         작성자 본인만 삭제 가능
+         ======================================== -->
+    <update id="deletePost">
+
+        UPDATE POST
+        SET POST_STATUS = 'DELETED',
+            UPDATED_AT = SYSDATE
+        WHERE POST_NO = #{postNo}
+          AND MEMBER_NO = #{memberNo}
+          AND POST_STATUS = 'ACTIVE'
+
+    </update>
+
+</mapper>

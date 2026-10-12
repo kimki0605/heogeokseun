@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 
@@ -5,10 +6,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>허걱슨닷컴</title>
+    <title>허걱슨닷컴 | 관심사를 모으고, 일상을 나누다</title>
 
-    <!-- 메인 CSS 파일 -->
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <!-- 공통 CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css(v=3)}">
+
+    <!-- 검색창 전용 CSS -->
+    <style>
+        .header-search {
+            display: flex;
+            align-items: center;
+            flex: 0 1 270px;
+            min-width: 150px;
+            height: 40px;
+            border: 1px solid #dbe3f0;
+            border-radius: 8px;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .header-search input {
+            flex: 1;
+            min-width: 0;
+            height: 100%;
+            padding: 0 12px;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .header-search input::placeholder {
+            color: #9ca3af;
+        }
+
+        .header-search button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 100%;
+            border: none;
+            background: #2563eb;
+            color: #fff;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .header-search button:hover {
+            background: #1d4ed8;
+        }
+
+        .header-search button svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .header .header-inner {
+            gap: 16px;
+        }
+
+        @media (max-width: 1050px) {
+            .header-search {
+                flex-basis: 200px;
+            }
+        }
+
+        @media (max-width: 800px) {
+            .header .header-inner {
+                flex-wrap: wrap;
+            }
+
+            .header-search {
+                order: 3;
+                flex: 1 0 100%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -17,579 +93,287 @@
      상단 헤더
 ========================= -->
 <header class="header">
-
     <div class="header-inner">
 
         <!-- 로고 -->
-        <a href="/" class="logo">
-            허걱슨닷컴
-        </a>
+        <a th:href="@{/}" class="logo">허걱슨닷컴</a>
 
-        <!-- 메뉴 -->
+        <!-- 메인 메뉴 -->
         <nav class="nav">
-            <a href="/">홈</a>
+            <a th:href="@{/}">홈</a>
             <a href="#">게시판</a>
             <a href="#">인기글</a>
             <a href="#">중고거래</a>
         </nav>
 
+        <!-- 검색창: 게시글 검색 기능 연결 전 UI -->
+        <div class="header-search" role="search">
+            <input type="search"
+                   id="headerSearchInput"
+                   placeholder="게시글 검색"
+                   aria-label="게시글 검색">
+
+            <button type="button"
+                    aria-label="검색"
+                    title="검색"
+                    onclick="alert('게시글 검색 기능은 준비 중입니다.');">
+
+                <!-- 돋보기 아이콘 -->
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="2"
+                     stroke-linecap="round"
+                     stroke-linejoin="round"
+                     aria-hidden="true">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- 로그인 / 회원가입 / 마이페이지 -->
         <div class="header-right">
 
-            <!-- 검색창 -->
-            <form class="search-box">
-                <input
-                    type="text"
-                    placeholder="게시글을 검색해보세요">
-
-                <button type="submit">
-                    검색
-                </button>
-            </form>
-
-
-            <!-- =========================
-                 로그인하지 않은 상태
-            ========================== -->
-
-            <!--
-                session.loginMember가 없을 때만 표시
-            -->
+            <!-- 로그인하지 않은 경우 -->
             <th:block th:if="${session.loginMember == null}">
-
-                <a href="/login"
-                   class="login-btn">
+                <a th:href="@{/login}" class="login-btn">
                     로그인
                 </a>
 
-                <a href="/join"
-                   class="signup-btn">
+                <a th:href="@{/join}" class="signup-btn">
                     회원가입
                 </a>
-
             </th:block>
 
-
-            <!-- =========================
-                 로그인한 상태
-            ========================== -->
-
-            <!--
-                session.loginMember가 존재할 때만 표시
-            -->
+            <!-- 로그인한 경우 -->
             <th:block th:if="${session.loginMember != null}">
 
-                <!--
-                    로그인한 회원의 닉네임 표시
-
-                    예:
-                    닉네임이 허걱슨이면
-                    "허걱슨님"으로 표시됨
-                -->
-                <a href="#"
+                <!-- 닉네임 클릭 시 마이페이지 이동 -->
+                <a th:href="@{/mypage}"
                    class="login-btn"
                    th:text="|${session.loginMember.nickname}님|">
                     사용자님
                 </a>
 
                 <!-- 로그아웃 -->
-                <a href="/logout"
-                   class="signup-btn">
+                <a th:href="@{/logout}" class="signup-btn">
                     로그아웃
                 </a>
 
             </th:block>
 
         </div>
+    </div>
+</header>
+
+<!-- =========================
+     메인 배너
+========================= -->
+<section class="hero">
+
+    <div class="container hero-content">
+
+        <h1>
+            다양한 관심사와 이야기가 모이는 곳<br>
+            <span>허걱슨닷컴</span>
+        </h1>
+
+        <p>
+            일상의 소소한 이야기부터 취미와 정보 공유까지!<br>
+            함께 이야기하고 소통하는 커뮤니티에 오신 것을 환영합니다.
+        </p>
+
+        <!-- 비로그인 사용자 -->
+        <a th:if="${session.loginMember == null}"
+           th:href="@{/join}"
+           class="hero-btn">
+            지금 시작하기
+        </a>
+
+        <!-- 로그인 사용자 -->
+        <a th:if="${session.loginMember != null}"
+           th:href="@{/mypage}"
+           class="hero-btn">
+            내 활동 확인하기
+        </a>
 
     </div>
 
-</header>
-
-
-<main>
-
-    <!-- =========================
-         메인 소개 영역
-    ========================== -->
-    <section class="hero">
-
-        <div class="hero-content">
-
-            <span class="hero-label">
-                HEOGEOKSEUN COMMUNITY
-            </span>
-
-            <h1>
-                관심사를 나누고<br>
-                새로운 이야기를 만나보세요.
-            </h1>
-
-            <p>
-                일상부터 취업, 스포츠, 중고거래까지<br>
-                다양한 이야기가 모이는 커뮤니티
-            </p>
-
-            <a href="#categories"
-               class="hero-button">
-                게시판 둘러보기
-            </a>
-
-        </div>
-
-    </section>
-
-
-    <!-- =========================
-         게시판 카테고리
-    ========================== -->
-    <section
-        class="container category-section"
-        id="categories">
-
-        <div class="section-title">
-
-            <div>
-                <span>COMMUNITY</span>
-
-                <h2>
-                    관심있는 게시판을 찾아보세요
-                </h2>
-            </div>
-
-            <a href="#">
-                전체 게시판 →
-            </a>
-
-        </div>
-
-
-        <div class="category-grid">
-
-            <!-- 일상 -->
-            <a href="#"
-               class="category-card">
-
-                <div class="category-icon">
-                    ☕
-                </div>
-
-                <h3>일상</h3>
-
-                <p>
-                    오늘 있었던 이야기를 자유롭게 나눠보세요.
-                </p>
-
-            </a>
-
-
-            <!-- 스포츠 -->
-            <a href="#"
-               class="category-card">
-
-                <div class="category-icon">
-                    ⚽
-                </div>
-
-                <h3>스포츠</h3>
-
-                <p>
-                    좋아하는 스포츠와 경기에 대해 이야기해요.
-                </p>
-
-            </a>
-
-
-            <!-- 연애 -->
-            <a href="#"
-               class="category-card">
-
-                <div class="category-icon">
-                    💬
-                </div>
-
-                <h3>연애</h3>
-
-                <p>
-                    연애 고민과 다양한 이야기를 나눠보세요.
-                </p>
-
-            </a>
-
-
-            <!-- 취업 / 구직 -->
-            <a href="#"
-               class="category-card">
-
-                <div class="category-icon">
-                    💼
-                </div>
-
-                <h3>취업 / 구직</h3>
-
-                <p>
-                    취업 정보와 고민을 함께 공유해요.
-                </p>
-
-            </a>
-
-
-            <!-- 중고거래 -->
-            <a href="#"
-               class="category-card">
-
-                <div class="category-icon">
-                    🛍️
-                </div>
-
-                <h3>중고거래</h3>
-
-                <p>
-                    필요한 물건을 안전하게 사고팔아보세요.
-                </p>
-
-            </a>
-
-
-            <!-- 사회 이슈 -->
-            <a href="#"
-               class="category-card">
-
-                <div class="category-icon">
-                    🌎
-                </div>
-
-                <h3>사회 이슈</h3>
-
-                <p>
-                    다양한 사회 이야기를 자유롭게 나눠보세요.
-                </p>
-
-            </a>
-
-        </div>
-
-    </section>
-
-
-    <!-- =========================
-         최신글 / 인기글
-    ========================== -->
-    <section class="board-section">
-
-        <div class="container board-grid">
-
-
-            <!-- 최신글 -->
-            <div class="board-box">
-
-                <div class="board-header">
-
-                    <div>
-                        <span>NEW</span>
-                        <h2>최신글</h2>
-                    </div>
-
-                    <a href="#">
-                        더보기 →
-                    </a>
-
-                </div>
-
-
-                <div class="post-list">
-
-                    <a href="#"
-                       class="post">
-
-                        <div>
-                            <span class="post-category">
-                                일상
-                            </span>
-
-                            <strong>
-                                허걱슨닷컴에 오신 것을 환영합니다!
-                            </strong>
-                        </div>
-
-                        <span class="post-info">
-                            방금 전
-                        </span>
-
-                    </a>
-
-
-                    <a href="#"
-                       class="post">
-
-                        <div>
-                            <span class="post-category">
-                                취업 / 구직
-                            </span>
-
-                            <strong>
-                                요즘 취업 준비 어떻게 하고 계신가요?
-                            </strong>
-                        </div>
-
-                        <span class="post-info">
-                            5분 전
-                        </span>
-
-                    </a>
-
-
-                    <a href="#"
-                       class="post">
-
-                        <div>
-                            <span class="post-category">
-                                스포츠
-                            </span>
-
-                            <strong>
-                                오늘 경기 같이 이야기해요
-                            </strong>
-                        </div>
-
-                        <span class="post-info">
-                            12분 전
-                        </span>
-
-                    </a>
-
-
-                    <a href="#"
-                       class="post">
-
-                        <div>
-                            <span class="post-category">
-                                중고거래
-                            </span>
-
-                            <strong>
-                                사용하지 않는 키보드 판매합니다
-                            </strong>
-                        </div>
-
-                        <span class="post-info">
-                            20분 전
-                        </span>
-
-                    </a>
-
-                </div>
-
-            </div>
-
-
-            <!-- 인기글 -->
-            <div class="board-box">
-
-                <div class="board-header">
-
-                    <div>
-                        <span>HOT</span>
-                        <h2>인기글</h2>
-                    </div>
-
-                    <a href="#">
-                        더보기 →
-                    </a>
-
-                </div>
-
-
-                <div class="post-list">
-
-                    <a href="#"
-                       class="post">
-
-                        <div>
-                            <span class="rank">1</span>
-
-                            <strong>
-                                다들 요즘 가장 관심 있는 게 뭔가요?
-                            </strong>
-                        </div>
-
-                        <span class="post-info">
-                            댓글 32
-                        </span>
-
-                    </a>
-
-
-                    <a href="#"
-                       class="post">
-
-                        <div>
-                            <span class="rank">2</span>
-
-                            <strong>
-                                취업 준비하면서 느낀 점 공유합니다
-                            </strong>
-                        </div>
-
-                        <span class="post-info">
-                            댓글 24
-                        </span>
-
-                    </a>
-
-
-                    <a href="#"
-                       class="post">
-
-                        <div>
-                            <span class="rank">3</span>
-
-                            <strong>
-                                이번 주 스포츠 경기 기대되네요
-                            </strong>
-                        </div>
-
-                        <span class="post-info">
-                            댓글 19
-                        </span>
-
-                    </a>
-
-
-                    <a href="#"
-                       class="post">
-
-                        <div>
-                            <span class="rank">4</span>
-
-                            <strong>
-                                중고거래할 때 이것만은 확인하세요
-                            </strong>
-                        </div>
-
-                        <span class="post-info">
-                            댓글 15
-                        </span>
-
-                    </a>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- =========================
-         비로그인 사용자 회원가입 안내
-    ========================== -->
-
-    <!--
-        이미 로그인한 사람에게는
-        회원가입 안내를 보여줄 필요가 없으므로
-        비로그인 상태에서만 출력
-    -->
-    <section
-        class="join-section"
-        th:if="${session.loginMember == null}">
-
-        <div class="container join-box">
-
-            <div>
-
-                <span>
-                    WELCOME
-                </span>
-
-                <h2>
-                    허걱슨닷컴과 함께해보세요.
-                </h2>
-
-                <p>
-                    회원가입하고 다양한 사람들과 이야기를 나눠보세요.
-                </p>
-
-            </div>
-
-            <!-- 실제 회원가입 페이지 연결 -->
-            <a href="/join">
-                회원가입하기
-            </a>
-
-        </div>
-
-    </section>
-
-
-    <!-- =========================
-         로그인 사용자 환영 영역
-    ========================== -->
-
-    <!--
-        로그인한 상태에서는
-        기존 회원가입 안내 대신 환영 메시지를 표시
-    -->
-    <section
-        class="join-section"
-        th:if="${session.loginMember != null}">
-
-        <div class="container join-box">
-
-            <div>
-
-                <span>
-                    WELCOME BACK
-                </span>
-
-                <h2
-                    th:text="|${session.loginMember.nickname}님, 반갑습니다!|">
-                    회원님, 반갑습니다!
-                </h2>
-
-                <p>
-                    오늘도 허걱슨닷컴에서 다양한 이야기를 만나보세요.
-                </p>
-
-            </div>
-
-            <!--
-                나중에 게시글 작성 기능을 만들면
-                실제 글쓰기 주소로 변경할 예정
-            -->
-            <a href="#">
-                글 작성하기
-            </a>
-
-        </div>
-
-    </section>
-
-</main>
-
+</section>
 
 <!-- =========================
-     하단 Footer
+     커뮤니티 카테고리
+========================= -->
+<section class="categories container">
+
+    <div class="section-heading">
+        <h2>커뮤니티 둘러보기</h2>
+        <p>관심 있는 주제를 선택하고 다양한 이야기를 나눠보세요.</p>
+    </div>
+
+    <div class="category-grid">
+
+        <a href="#" class="category-card">
+            <div class="category-icon">☕</div>
+            <h3>일상</h3>
+            <p>소소한 하루의 이야기를 공유해요.</p>
+        </a>
+
+        <a href="#" class="category-card">
+            <div class="category-icon">⚽</div>
+            <h3>스포츠</h3>
+            <p>좋아하는 스포츠 이야기를 나눠요.</p>
+        </a>
+
+        <a href="#" class="category-card">
+            <div class="category-icon">💗</div>
+            <h3>연애</h3>
+            <p>다양한 고민과 이야기를 나눠요.</p>
+        </a>
+
+        <a href="#" class="category-card">
+            <div class="category-icon">💼</div>
+            <h3>취업 / 구직</h3>
+            <p>취업 정보와 경험을 공유해요.</p>
+        </a>
+
+        <a href="#" class="category-card">
+            <div class="category-icon">🛍️</div>
+            <h3>중고거래</h3>
+            <p>필요한 물건을 사고팔아요.</p>
+        </a>
+
+        <a href="#" class="category-card">
+            <div class="category-icon">🎮</div>
+            <h3>취미</h3>
+            <p>공통 관심사를 가진 사람들과 소통해요.</p>
+        </a>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     최신 게시글
+     현재는 화면 확인용 예시 데이터
+========================= -->
+<section class="posts-section container">
+
+    <div class="section-heading">
+        <h2>최신 게시글</h2>
+        <p>커뮤니티의 새로운 이야기를 만나보세요.</p>
+    </div>
+
+    <div class="post-list">
+
+        <div class="post-item">
+            <span class="post-category">일상</span>
+            <div class="post-content">
+                <h3>오늘 하루 다들 어떻게 보내셨나요?</h3>
+                <p>자유롭게 일상을 나눠보세요.</p>
+            </div>
+        </div>
+
+        <div class="post-item">
+            <span class="post-category">스포츠</span>
+            <div class="post-content">
+                <h3>요즘 가장 재미있게 보는 스포츠는?</h3>
+                <p>좋아하는 팀과 경기를 이야기해요.</p>
+            </div>
+        </div>
+
+        <div class="post-item">
+            <span class="post-category">취미</span>
+            <div class="post-content">
+                <h3>새로운 취미를 추천해주세요!</h3>
+                <p>여러분의 취미 생활을 소개해주세요.</p>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     인기 게시글
+     현재는 화면 확인용 예시 데이터
+========================= -->
+<section class="posts-section container">
+
+    <div class="section-heading">
+        <h2>인기 게시글</h2>
+        <p>지금 많은 사람들이 관심을 갖는 이야기예요.</p>
+    </div>
+
+    <div class="post-list">
+
+        <div class="post-item">
+            <span class="post-category">인기</span>
+            <div class="post-content">
+                <h3>요즘 가장 재미있는 취미 추천 모음</h3>
+                <p>다양한 취미를 함께 알아봐요.</p>
+            </div>
+        </div>
+
+        <div class="post-item">
+            <span class="post-category">인기</span>
+            <div class="post-content">
+                <h3>중고거래할 때 알아두면 좋은 팁</h3>
+                <p>안전하고 편리한 거래를 위한 이야기예요.</p>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     하단 참여 안내
+========================= -->
+<section class="bottom-cta">
+
+    <div class="container">
+
+        <h2>허걱슨닷컴에서 함께 이야기해요!</h2>
+
+        <p>
+            다양한 사람들과 관심사를 공유하고<br>
+            새로운 이야기를 만들어보세요.
+        </p>
+
+        <!-- 비로그인 사용자 -->
+        <a th:if="${session.loginMember == null}"
+           th:href="@{/join}"
+           class="hero-btn">
+            회원가입하기
+        </a>
+
+        <!-- 로그인 사용자 -->
+        <a th:if="${session.loginMember != null}"
+           th:href="@{/mypage}"
+           class="hero-btn">
+            마이페이지 바로가기
+        </a>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     푸터
 ========================= -->
 <footer class="footer">
 
     <div class="container footer-inner">
 
         <div>
-
-            <strong>
-                허걱슨닷컴
-            </strong>
-
-            <p>
-                다양한 관심사와 이야기가 모이는 커뮤니티
-            </p>
-
+            <strong>허걱슨닷컴</strong>
+            <p>관심사를 모으고, 일상을 나누다.</p>
         </div>
 
-        <p>
-            © 2026 HEOGEOKSEUN.COM
-        </p>
+        <p>© 2026 HEOGEOKSEUN.COM</p>
 
     </div>
 

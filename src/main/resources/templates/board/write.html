@@ -1,0 +1,281 @@
+
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>글쓰기 | 허걱슨닷컴</title>
+
+    <link rel="stylesheet" th:href="@{/css/style.css(v=3)}">
+
+    <style>
+        .write-header {
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .write-header-inner {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .write-logo {
+            font-size: 23px;
+            font-weight: 800;
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .write-nav {
+            display: flex;
+            gap: 24px;
+        }
+
+        .write-nav a {
+            color: #334155;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .write-page {
+            max-width: 900px;
+            min-height: 75vh;
+            margin: 0 auto;
+            padding: 55px 24px 100px;
+        }
+
+        .write-breadcrumb {
+            margin-bottom: 24px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .write-breadcrumb a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .write-title {
+            margin-bottom: 12px;
+            font-size: 32px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .write-description {
+            margin-bottom: 35px;
+            color: #64748b;
+            font-size: 15px;
+        }
+
+        .write-form {
+            padding: 35px;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            background: #ffffff;
+        }
+
+        .write-field {
+            margin-bottom: 28px;
+        }
+
+        .write-field label {
+            display: block;
+            margin-bottom: 10px;
+            color: #334155;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .write-input,
+        .write-textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 14px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            background: #ffffff;
+            color: #0f172a;
+            font-size: 15px;
+            font-family: inherit;
+        }
+
+        .write-input:focus,
+        .write-textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .write-textarea {
+            min-height: 340px;
+            resize: vertical;
+            line-height: 1.8;
+        }
+
+        .write-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .write-cancel,
+        .write-submit {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 110px;
+            padding: 13px 22px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .write-cancel {
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+        }
+
+        .write-submit {
+            border: 1px solid #2563eb;
+            background: #2563eb;
+            color: #ffffff;
+        }
+
+        .write-submit:hover {
+            background: #1d4ed8;
+        }
+
+        .write-footer {
+            padding: 30px 20px;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            .write-header-inner {
+                flex-wrap: wrap;
+            }
+
+            .write-nav {
+                gap: 14px;
+            }
+
+            .write-page {
+                padding: 35px 16px 70px;
+            }
+
+            .write-title {
+                font-size: 26px;
+            }
+
+            .write-form {
+                padding: 22px 18px;
+            }
+
+            .write-actions {
+                flex-direction: column;
+            }
+
+            .write-cancel,
+            .write-submit {
+                width: 100%;
+                box-sizing: border-box;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="write-header">
+        <div class="write-header-inner">
+            <a class="write-logo" th:href="@{/}">
+                허걱슨닷컴
+            </a>
+
+            <nav class="write-nav">
+                <a th:href="@{/}">홈</a>
+                <a th:href="@{/boards}">게시판</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="write-page">
+
+        <div class="write-breadcrumb">
+            <a th:href="@{/boards}">전체 게시판</a>
+            &gt;
+            <a th:href="@{/boards/{boardNo}(boardNo=${board.boardNo})}"
+               th:text="${board.boardName}">
+                게시판
+            </a>
+            &gt; 글쓰기
+        </div>
+
+        <h1 class="write-title">게시글 작성</h1>
+
+        <p class="write-description">
+            다른 회원들과 나누고 싶은 이야기를 작성해 주세요.
+        </p>
+
+        <form class="write-form"
+              th:action="@{/boards/{boardNo}/posts(boardNo=${board.boardNo})}"
+              method="post">
+
+            <div class="write-field">
+                <label for="title">제목</label>
+
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    class="write-input"
+                    placeholder="제목을 입력해 주세요."
+                    maxlength="200"
+                    required>
+            </div>
+
+            <div class="write-field">
+                <label for="content">내용</label>
+
+                <textarea
+                    id="content"
+                    name="content"
+                    class="write-textarea"
+                    placeholder="내용을 입력해 주세요."
+                    required></textarea>
+            </div>
+
+            <div class="write-actions">
+                <a class="write-cancel"
+                   th:href="@{/boards/{boardNo}(boardNo=${board.boardNo})}">
+                    취소
+                </a>
+
+                <button type="submit" class="write-submit">
+                    등록하기
+                </button>
+            </div>
+
+        </form>
+
+    </main>
+
+    <footer class="write-footer">
+        © 2026 HEOGEOKSEUN.COM
+    </footer>
+
+</body>
+</html>

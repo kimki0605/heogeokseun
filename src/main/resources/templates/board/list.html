@@ -1,0 +1,241 @@
+
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시판 목록 | 허걱슨닷컴</title>
+
+    <link rel="stylesheet" th:href="@{/css/style.css(v=3)}">
+
+    <style>
+        .boards-page {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 65px 24px 100px;
+            min-height: 70vh;
+        }
+
+        .boards-page-title {
+            margin-bottom: 12px;
+            font-size: 32px;
+            font-weight: 800;
+            color: #111827;
+        }
+
+        .boards-page-description {
+            margin-bottom: 36px;
+            font-size: 16px;
+            color: #64748b;
+        }
+
+        .boards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .boards-card {
+            display: block;
+            min-height: 190px;
+            padding: 28px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s,
+                        border-color 0.2s;
+        }
+
+        .boards-card:hover {
+            transform: translateY(-4px);
+            border-color: #93c5fd;
+            box-shadow: 0 12px 28px rgba(37, 99, 235, 0.08);
+        }
+
+        .boards-card-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 46px;
+            height: 46px;
+            margin-bottom: 22px;
+            background: #eff6ff;
+            border-radius: 12px;
+            font-size: 23px;
+        }
+
+        .boards-card-title {
+            margin-bottom: 10px;
+            font-size: 19px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .boards-card-description {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .boards-empty {
+            grid-column: 1 / -1;
+            padding: 70px 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .boards-header {
+            border-bottom: 1px solid #e2e8f0;
+            background: #ffffff;
+        }
+
+        .boards-header-inner {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .boards-logo {
+            color: #2563eb;
+            font-size: 23px;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .boards-nav {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .boards-nav a {
+            color: #334155;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .boards-nav a:hover {
+            color: #2563eb;
+        }
+
+        .boards-footer {
+            border-top: 1px solid #e2e8f0;
+            padding: 30px 24px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        @media (max-width: 900px) {
+            .boards-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 580px) {
+            .boards-page {
+                padding: 40px 16px 70px;
+            }
+
+            .boards-page-title {
+                font-size: 26px;
+            }
+
+            .boards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .boards-header-inner {
+                flex-wrap: wrap;
+            }
+
+            .boards-nav {
+                gap: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 상단 메뉴 -->
+    <header class="boards-header">
+        <div class="boards-header-inner">
+
+            <a class="boards-logo" th:href="@{/}">
+                허걱슨닷컴
+            </a>
+
+            <nav class="boards-nav">
+                <a th:href="@{/}">홈</a>
+                <a th:href="@{/boards}">게시판</a>
+                <a th:href="@{/}">인기글</a>
+                <a th:href="@{/}">중고거래</a>
+            </nav>
+
+        </div>
+    </header>
+
+    <!-- 게시판 목록 -->
+    <main class="boards-page">
+
+        <h1 class="boards-page-title">전체 게시판</h1>
+
+        <p class="boards-page-description">
+            관심 있는 게시판을 선택하고 다양한 이야기를 나눠보세요.
+        </p>
+
+        <div class="boards-grid">
+
+            <!-- DB에서 조회한 게시판 반복 출력 -->
+            <a class="boards-card"
+               th:each="board : ${boards}"
+               th:href="@{/boards/{boardNo}(boardNo=${board.boardNo})}">
+
+                <span class="boards-card-icon"
+                      th:switch="${board.boardName}">
+                    <span th:case="'일상'">☀️</span>
+                    <span th:case="'스포츠'">⚽</span>
+                    <span th:case="'연애'">💬</span>
+                    <span th:case="'취업/구직'">💼</span>
+                    <span th:case="'중고거래'">🛍️</span>
+                    <span th:case="*">📋</span>
+                </span>
+
+                <h2 class="boards-card-title"
+                    th:text="${board.boardName}">
+                    게시판 이름
+                </h2>
+
+                <p class="boards-card-description"
+                   th:text="${board.boardDescription}">
+                    게시판 설명
+                </p>
+
+            </a>
+
+            <!-- 게시판이 없을 경우 -->
+            <div class="boards-empty"
+                 th:if="${#lists.isEmpty(boards)}">
+                현재 이용 가능한 게시판이 없습니다.
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- 하단 -->
+    <footer class="boards-footer">
+        © 2026 HEOGEOKSEUN.COM
+    </footer>
+
+</body>
+</html>
